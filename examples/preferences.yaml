@@ -1,0 +1,9 @@
+# Dietary preferences & constraints
+people: 2 adults + 1 child
+style: easy_weeknights  # easy_weeknights | batch_cook | mixed
+diet: omnivore   # omnivore | vegetarian | pescatarian
+exclude_ingredients: [mushrooms, olives]
+budget: medium   # low | medium | high
+allergies: []
+notes: |
+  Aim for 30-min dinners. Leftovers are okay once or twice.

@@ -1,0 +1,36 @@
+[project]
+name = "meal-planner"
+version = "0.1.0"
+description = "Weekly meal planner with interactive Streamlit dashboard"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.12"
+authors = [{name = "Brittney Erler"}]
+dependencies = [
+    "streamlit>=1.40.0",
+    "pandas>=2.2.0",
+    "pyyaml>=6.0",
+    "requests>=2.32.0",
+    "recipe-scrapers>=15.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.9"]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]

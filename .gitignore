@@ -1,0 +1,25 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+output/
+data/*.db
+.env
+*.DS_Store
+
+# AI assistant context
+.claude/
+CLAUDE.md
+AGENTS.md
+
+# Obsidian artifacts
+_INDEX.md
+*.canvas
