@@ -80,11 +80,9 @@ Ingredients go through alias resolution, plural stripping, and section classific
 │   └── units.py                  # Unit normalization (tsp → teaspoon, etc.)
 ├── scripts/
 │   ├── ingest.py                 # Markdown → SQLite import
-│   ├── seed.py                   # TheMealDB API seeder
 │   └── seed_to_markdown.py       # Seed JSON → Markdown conversion
 ├── tests/                    # pytest suite (8 test files)
 ├── Meals/                    # 250 recipe Markdown files
-├── seed_data/                # TheMealDB JSON (595 recipes)
 └── data/                     # SQLite database (generated)
 ```
 
@@ -128,6 +126,10 @@ This project was developed with AI assistance (Claude). AI was used for:
 - Code review
 
 Core logic (planning algorithm, ingredient normalization, data pipeline design) was authored and understood by the developer. All code was reviewed and tested before inclusion.
+
+## Data Attribution
+
+Initial recipe data was sourced from [TheMealDB](https://www.themealdb.com/) (free API), then converted to Markdown and hand-edited into the final recipe library. The raw API data and seed script were removed after formatting was complete — the Markdown files in `Meals/` are the canonical source of truth.
 
 ## License
 
