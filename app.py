@@ -141,34 +141,52 @@ def _onboard_pantry():
             st.rerun()
     with col2:
         if st.button("Continue", use_container_width=True, type="primary"):
-            # Save user settings to DB now that pantry step is done
-            data = st.session_state.onboard_data
-            save_user_settings(conn, data["name"], data["servings"], data["meals_per_week"])
-            for display_name, category in selected_all:
-                normalized = normalize(display_name)
-                add_pantry_item(conn, display_name, normalized, category)
-            for item in custom_items:
-                normalized = normalize(item)
-                add_pantry_item(conn, item, normalized, get_section(item))
+            # Store pantry selections in session state — DB write happens in step 3
+            st.session_state.onboard_pantry = {
+                "selected": selected_all,
+                "custom": custom_items,
+            }
             st.session_state.onboard_step = 3
             st.rerun()
 
 
 def _onboard_done():
-    settings = get_user_settings(conn)
-    pantry = get_pantry_items(conn)
+    data = st.session_state.get("onboard_data", {})
+    pantry_data = st.session_state.get("onboard_pantry", {})
+    pantry_count = len(pantry_data.get("selected", [])) + len(pantry_data.get("custom", []))
 
-    st.header(f"You're all set, {settings['name']}!")
+    st.header(f"You're all set, {data.get('name', '')}!")
     st.caption("Here's a quick summary of your setup.")
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("Servings / meal", settings["servings"])
-    col2.metric("Dinners / week", settings["meals_per_week"])
-    col3.metric("Pantry items", len(pantry))
+    col1.metric("Servings / meal", data.get("servings", 4))
+    col2.metric("Dinners / week", data.get("meals_per_week", 5))
+    col3.metric("Pantry items", pantry_count)
+
+    st.divider()
+    st.subheader("Here's how it works")
+
+    st.markdown(
+        "We've included **150+ curated recipes** to get you started — "
+        "and you can add your own anytime.\n\n"
+        "**Browse Recipes** — Pin favorites or let the planner choose for you.\n\n"
+        "**Meal Planner** — Generate a week of dinners in one click.\n\n"
+        "**Shopping List** — Grouped by store section, pantry items filtered out.\n\n"
+        "**Pantry** — Keep it updated for smarter lists."
+    )
 
     st.divider()
     if st.button("Start Planning", use_container_width=True, type="primary"):
+        # Write all onboarding data to DB
+        save_user_settings(conn, data["name"], data["servings"], data["meals_per_week"])
+        for display_name, category in pantry_data.get("selected", []):
+            add_pantry_item(conn, display_name, normalize(display_name), category)
+        for item in pantry_data.get("custom", []):
+            add_pantry_item(conn, item, normalize(item), get_section(item))
+        # Clean up session state
         del st.session_state.onboard_step
+        st.session_state.pop("onboard_data", None)
+        st.session_state.pop("onboard_pantry", None)
         st.rerun()
 
 
