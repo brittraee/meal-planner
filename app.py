@@ -22,6 +22,11 @@ st.set_page_config(
     layout="wide",
 )
 
+st.markdown(
+    "<style>a.stHeaderLink { display: none !important; }</style>",
+    unsafe_allow_html=True,
+)
+
 conn = get_connection()
 init_db(conn)
 
@@ -121,6 +126,13 @@ def _onboard_pantry():
     total_count = len(selected_all) + len(custom_items)
     if total_count:
         st.caption(f"**{total_count}** ingredients selected")
+
+    st.divider()
+    prioritize_pantry = st.checkbox(
+        "Prioritize recipes that use ingredients I already have",
+        value=True,
+        help="The meal planner will score recipes higher if they match your pantry items.",
+    )
 
     col1, col2 = st.columns(2)
     with col1:

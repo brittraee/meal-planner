@@ -11,7 +11,7 @@ from src.database import (
     search_recipes,
 )
 
-PAGE_SIZE = 50
+PAGE_SIZE = 75
 
 # --- Custom CSS for compact rows ---
 st.markdown(
@@ -38,7 +38,7 @@ st.markdown(
 )
 
 st.title("Recipe Browser")
-st.caption("Click any recipe to see ingredients and prep details. Pin recipes to include them in your next meal plan.")
+st.caption("Click any recipe to see ingredients and prep details. Pin recipes to lock them into your plan, or let the Meal Planner shuffle and pick for you.")
 
 conn = get_connection()
 init_db(conn)
