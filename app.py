@@ -62,7 +62,7 @@ def _onboard_welcome():
     st.caption("Plan smarter. Shop once. Eat well all week.")
 
     with st.form("onboard_welcome"):
-        name = st.text_input("What should we call you?", placeholder="Brittney")
+        name = st.text_input("What should we call you?", placeholder="Name")
         servings = st.slider(
             "Default servings per meal",
             min_value=1,
@@ -82,14 +82,18 @@ def _onboard_welcome():
         if not name.strip():
             st.error("Please enter a name.")
             return
-        save_user_settings(conn, name.strip(), servings, meals_per_week)
+        st.session_state.onboard_data = {
+            "name": name.strip(),
+            "servings": servings,
+            "meals_per_week": meals_per_week,
+        }
         st.session_state.onboard_step = 2
         st.rerun()
 
 
 def _onboard_pantry():
-    settings = get_user_settings(conn)
-    st.header(f"Hey {settings['name']} \u2014 what's in your kitchen?")
+    data = st.session_state.get("onboard_data", {})
+    st.header(f"Hey {data.get('name', '')} \u2014 what's in your kitchen?")
     st.caption("Select ingredients you already have. We'll skip them on grocery lists.")
 
     sections = get_ingredients_by_section()
@@ -125,6 +129,9 @@ def _onboard_pantry():
             st.rerun()
     with col2:
         if st.button("Continue", use_container_width=True, type="primary"):
+            # Save user settings to DB now that pantry step is done
+            data = st.session_state.onboard_data
+            save_user_settings(conn, data["name"], data["servings"], data["meals_per_week"])
             for display_name, category in selected_all:
                 normalized = normalize(display_name)
                 add_pantry_item(conn, display_name, normalized, category)
@@ -176,6 +183,17 @@ def _main_app():
 
     if settings:
         st.sidebar.caption(f"Hey {settings['name']}!")
+        pantry = get_pantry_items(conn)
+        st.sidebar.markdown(
+            f"**{settings['servings']}** servings/meal · "
+            f"**{settings['meals_per_week']}** dinners/week · "
+            f"**{len(pantry)}** pantry items"
+        )
+        if st.sidebar.button("Reset preferences", use_container_width=True):
+            conn.execute("DELETE FROM user_settings")
+            conn.execute("DELETE FROM pantry_items")
+            conn.commit()
+            st.rerun()
 
     pg.run()
 
