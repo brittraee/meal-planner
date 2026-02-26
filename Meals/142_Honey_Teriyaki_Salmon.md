@@ -9,7 +9,7 @@
 **Quick Prep:**  
 Mix all the ingredients in the Honey Teriyaki Glaze together. Whisk to blend well.
 
-**Tags:** #seafood #breakfast #japanese #30min
+**Tags:** #seafood #japanese #30min
 
 **Prep Time:** 10 min | **Total Time:** 30 min
 

@@ -123,8 +123,15 @@ def _migrate(conn: sqlite3.Connection) -> None:
 def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
     """Insert a Recipe object into the database.
 
-    Uses INSERT OR REPLACE to support re-importing.
+    Uses INSERT OR REPLACE to support re-importing.  Skips ingredient
+    replacement when the recipe already has scraped qty data (prevents
+    markdown re-import from wiping backfilled quantities).
     """
+    has_qty = conn.execute(
+        "SELECT 1 FROM recipe_ingredients WHERE recipe_id = ? AND qty IS NOT NULL LIMIT 1",
+        (recipe.filename,),
+    ).fetchone()
+
     conn.execute(
         """INSERT OR REPLACE INTO recipes (id, title, prep_notes, source_file, protein)
            VALUES (?, ?, ?, ?, ?)""",
@@ -136,17 +143,21 @@ def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
             recipe.protein.value,
         ),
     )
-    # Clear old ingredients and tags for clean re-import
-    conn.execute("DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe.filename,))
-    conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (recipe.filename,))
 
-    for ing in recipe.ingredients:
+    if not has_qty:
         conn.execute(
-            """INSERT INTO recipe_ingredients (recipe_id, raw_text, normalized_name, is_optional)
-               VALUES (?, ?, ?, ?)""",
-            (recipe.filename, ing.name, ing.normalized, 1 if ing.optional else 0),
+            "DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe.filename,)
         )
+        for ing in recipe.ingredients:
+            conn.execute(
+                """INSERT INTO recipe_ingredients
+                   (recipe_id, raw_text, normalized_name, is_optional)
+                   VALUES (?, ?, ?, ?)""",
+                (recipe.filename, ing.name, ing.normalized, 1 if ing.optional else 0),
+            )
 
+    # Tags always refresh (low risk, no qty data)
+    conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (recipe.filename,))
     for tag in recipe.tags:
         conn.execute(
             "INSERT OR IGNORE INTO recipe_tags (recipe_id, tag) VALUES (?, ?)",

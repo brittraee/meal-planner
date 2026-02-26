@@ -1,0 +1,2 @@
+# Ignore pytest artifacts
+__pycache__/

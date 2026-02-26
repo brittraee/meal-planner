@@ -21,8 +21,9 @@ st.markdown(
         justify-content: flex-start;
         font-size: 1.05rem;
     }
-    /* Make recipe cards feel clickable */
+    /* Card container: position anchor for the click overlay */
     [data-testid="stVerticalBlockBorderWrapper"]:has([data-testid="stBaseButton-tertiary"]) {
+        position: relative;
         cursor: pointer;
         transition: background-color 0.15s ease, border-color 0.15s ease;
     }
@@ -30,7 +31,21 @@ st.markdown(
         background-color: rgba(128, 128, 128, 0.08);
         border-color: rgba(128, 128, 128, 0.3);
     }
-    /* Keep pin button compact and out of the way */
+    /* Stretch title button click area to fill entire card */
+    [data-testid="stBaseButton-tertiary"] button::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+    }
+    /* Keep pin button above the card click overlay */
+    [data-testid="stBaseButton-secondary"] {
+        position: relative;
+        z-index: 2;
+    }
     button[data-testid="stBaseButton-secondary"] {
         padding: 0.15rem 0.4rem;
         min-height: 0;
@@ -167,8 +182,10 @@ if results:
                         # Top row: title + pin icon
                         title_col, pin_col = st.columns([5, 1])
                         with title_col:
+                            is_viewing = st.session_state.get("viewing_recipe") == recipe_id
+                            arrow = "\u25BC" if is_viewing else "\u25B6"
                             if st.button(
-                                recipe["title"],
+                                f"{arrow} {recipe['title']}",
                                 key=f"view_{recipe_id}",
                                 use_container_width=True,
                                 type="tertiary",
@@ -225,19 +242,24 @@ if results:
                                 lines = []
                                 for ing in details["ingredients"]:
                                     optional = " *(optional)*" if ing["is_optional"] else ""
-                                    qty_str = ""
                                     if ing.get("qty"):
                                         q = ing["qty"]
-                                        qty_str = (
-                                            str(int(q))
-                                            if q == int(q)
-                                            else f"{q:.2f}".rstrip("0").rstrip(".")
+                                        qs = str(int(q)) if q == int(q) else f"{q:g}"
+                                        unit = f" {ing['unit']}" if ing.get("unit") else ""
+                                        lines.append(
+                                            f"- {qs}{unit} {ing['normalized_name']}{optional}"
                                         )
-                                        if ing.get("unit"):
-                                            qty_str = f"{qty_str} {ing['unit']}"
-                                        qty_str += " "
-                                    lines.append(f"- {qty_str}{ing['raw_text']}{optional}")
+                                    else:
+                                        lines.append(f"- {ing['normalized_name']}{optional}")
                                 st.markdown("**Ingredients:**\n" + "\n".join(lines))
+
+    # --- Continue to planner ---
+    st.divider()
+    spacer, btn_col = st.columns([5, 1.5])
+    with btn_col:
+        pinned_count = len(pinned)
+        label = f"Meal Planner ({pinned_count} pinned)" if pinned_count else "Meal Planner"
+        st.page_link("pages/2_planner.py", label=label, icon="\U0001f4c5")
 
 else:
     st.info("No recipes match the current filters.")
