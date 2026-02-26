@@ -9,7 +9,6 @@ A meal planning app built with Streamlit, SQLite, and Pandas. Generates balanced
 - **Meal Planner** — Scoring algorithm builds 3-7 day plans with protein variety, pantry-aware ranking, and tag priority options. Shows *why* each recipe was chosen (pantry matches, tag bonuses)
 - **Shopping List** — Auto-consolidated from a meal plan, scaled by servings, grouped by store section, pantry items filtered out
 - **Pantry** — Track what you have on hand; the planner and shopping list both use this
-- **History** — View past plans and recipe frequency
 - **Add Recipe** — Import from URL or add manually
 
 ## Tech stack
@@ -48,7 +47,6 @@ pages/
   2_planner.py                # Plan generator with scoring evidence
   3_shopping.py               # Shopping list
   4_pantry.py                 # Pantry manager
-  5_history.py                # Plan history
   6_add_recipe.py             # Add/import recipes
 src/
   database.py                 # Schema, queries (7 tables)

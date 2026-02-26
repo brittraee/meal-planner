@@ -22,6 +22,7 @@ tab_url, tab_manual = st.tabs(["Import from URL", "Manual Entry"])
 
 # ---- Tab 1: URL Import ----
 with tab_url:
+    st.caption("Paste a recipe URL and we'll pull in the title, ingredients, and image.")
     url = st.text_input("Recipe URL", placeholder="https://www.allrecipes.com/recipe/...")
 
     if st.button("Scrape Recipe", type="primary", disabled=not url):
@@ -81,6 +82,7 @@ with tab_url:
 
 # ---- Tab 2: Manual Entry ----
 with tab_manual:
+    st.caption("Add a recipe by hand — fill in what you have, skip what you don't.")
     title = st.text_input("Recipe title", key="manual_title")
     servings = st.number_input(
         "Servings", min_value=1, max_value=20, value=4, key="manual_servings"
@@ -93,12 +95,17 @@ with tab_manual:
 
     # Dynamic ingredients
     st.markdown("**Ingredients**")
+    header_cols = st.columns([1, 1, 3])
+    header_cols[0].caption("Qty")
+    header_cols[1].caption("Unit")
+    header_cols[2].caption("Ingredient")
     if "manual_ingredient_count" not in st.session_state:
         st.session_state["manual_ingredient_count"] = 3
 
     ingredients = []
+    row_to_remove = None
     for i in range(st.session_state["manual_ingredient_count"]):
-        cols = st.columns([1, 1, 3])
+        cols = st.columns([1, 1, 3, 0.4])
         with cols[0]:
             qty = st.text_input("Qty", key=f"ing_qty_{i}", label_visibility="collapsed",
                                 placeholder="Qty")
@@ -108,6 +115,11 @@ with tab_manual:
         with cols[2]:
             name = st.text_input("Ingredient", key=f"ing_name_{i}", label_visibility="collapsed",
                                  placeholder="Ingredient name")
+        with cols[3]:
+            if st.session_state["manual_ingredient_count"] > 1 and st.button(
+                "✕", key=f"ing_del_{i}"
+            ):
+                row_to_remove = i
         if name:
             parsed_qty = None
             if qty:
@@ -128,6 +140,20 @@ with tab_manual:
                 "qty": parsed_qty,
                 "unit": unit.strip() or None,
             })
+
+    if row_to_remove is not None:
+        # Shift values from rows above the removed one down
+        count = st.session_state["manual_ingredient_count"]
+        for j in range(row_to_remove, count - 1):
+            for field in ("qty", "unit", "name"):
+                src_key = f"ing_{field}_{j + 1}"
+                dst_key = f"ing_{field}_{j}"
+                st.session_state[dst_key] = st.session_state.get(src_key, "")
+        # Clear the last row's keys
+        for field in ("qty", "unit", "name"):
+            st.session_state.pop(f"ing_{field}_{count - 1}", None)
+        st.session_state["manual_ingredient_count"] = count - 1
+        st.rerun()
 
     if st.button("+ Add ingredient row"):
         st.session_state["manual_ingredient_count"] += 1

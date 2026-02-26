@@ -1,4 +1,4 @@
-"""Recipe browser with search, tag filter, and protein filter."""
+"""Recipe browser — single scrollable page grouped by protein."""
 
 import streamlit as st
 
@@ -11,9 +11,7 @@ from src.database import (
     search_recipes,
 )
 
-PAGE_SIZE = 75
-
-# --- Custom CSS for compact rows ---
+# --- Custom CSS ---
 st.markdown(
     """
     <style>
@@ -32,20 +30,28 @@ st.markdown(
         background-color: rgba(128, 128, 128, 0.08);
         border-color: rgba(128, 128, 128, 0.3);
     }
+    /* Keep pin button compact and out of the way */
+    button[data-testid="stBaseButton-secondary"] {
+        padding: 0.15rem 0.4rem;
+        min-height: 0;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 st.title("Recipe Browser")
-st.caption("Click any recipe to see ingredients and prep details. Pin recipes to lock them into your plan, or let the Meal Planner shuffle and pick for you.")
+st.caption(
+    "Click any recipe to see ingredients and prep details. "
+    "Pin recipes to lock them into your meal plan."
+)
 
 conn = get_connection()
 init_db(conn)
 
 # --- Pinned recipes (session state) ---
 if "pinned_recipes" not in st.session_state:
-    st.session_state.pinned_recipes = {}  # {recipe_id: title}
+    st.session_state.pinned_recipes = {}
 
 pinned = st.session_state.pinned_recipes
 
@@ -59,19 +65,16 @@ if not all_recipes:
 proteins = get_unique_proteins(conn)
 available_tags = [t for t in get_unique_tags(conn) if not t.rstrip("min").isdigit()]
 time_options = ["Any time", "15 min", "30 min", "45 min", "60 min", "90 min", "120 min"]
-time_values = {"Any time": None, "15 min": 15, "30 min": 30, "45 min": 45, "60 min": 60, "90 min": 90, "120 min": 120}
+time_values = {
+    "Any time": None, "15 min": 15, "30 min": 30, "45 min": 45,
+    "60 min": 60, "90 min": 90, "120 min": 120,
+}
 
 protein_col, time_col, tags_col, spacer, search_col = st.columns([1.5, 1.5, 2.5, 0.5, 2])
 with protein_col:
-    selected_protein = st.selectbox(
-        "Protein Type",
-        ["All proteins", *proteins],
-    )
+    selected_protein = st.selectbox("Protein Type", ["All proteins", *proteins])
 with time_col:
-    selected_time = st.selectbox(
-        "Prep/Cook Time",
-        time_options,
-    )
+    selected_time = st.selectbox("Prep/Cook Time", time_options)
 with tags_col:
     selected_tags = st.multiselect("Tags", available_tags)
 with search_col:
@@ -99,125 +102,142 @@ if pinned:
             st.session_state.pinned_recipes = {}
             st.rerun()
 
-# --- Pagination ---
-total = len(results)
-if "recipe_page" not in st.session_state:
-    st.session_state.recipe_page = 0
+# --- Group recipes by section ---
+BREAKFAST_TAGS = {"breakfastfordinner", "brinner", "breakfast"}
 
-# Reset page when filters change
-filter_key = f"{search_text}|{selected_tags}|{selected_protein}|{selected_time}"
-if st.session_state.get("_filter_key") != filter_key:
-    st.session_state.recipe_page = 0
-    st.session_state._filter_key = filter_key
+SECTION_ICONS = {
+    "Breakfast": "\U0001f373",
+    "Chicken": "\U0001f357",
+    "Beef": "\U0001f969",
+    "Pork": "\U0001f953",
+    "Fish": "\U0001f41f",
+    "Shrimp": "\U0001f990",
+    "Seafood": "\U0001f99e",
+    "Vegetarian": "\U0001f96c",
+    "Vegan": "\U0001f331",
+}
 
-page = st.session_state.recipe_page
-total_pages = max(1, (total + PAGE_SIZE - 1) // PAGE_SIZE)
-page = min(page, total_pages - 1)
-start = page * PAGE_SIZE
-page_results = results[start : start + PAGE_SIZE]
+SECTION_ORDER = [
+    "Breakfast", "Chicken", "Beef", "Pork",
+    "Fish", "Shrimp", "Seafood", "Vegetarian", "Vegan",
+]
 
-st.caption(f"{start + 1}–{min(start + PAGE_SIZE, total)} of {total}")
 
-# --- Recipe card grid ---
+def _get_section(recipe: dict) -> str:
+    """Determine which section a recipe belongs to."""
+    tags = set(recipe.get("tags", []))
+    if tags & BREAKFAST_TAGS:
+        return "Breakfast"
+    protein = recipe.get("protein", "Other") or "Other"
+    return protein.title()
+
+
+sections: dict[str, list[dict]] = {}
+for recipe in results:
+    section = _get_section(recipe)
+    sections.setdefault(section, []).append(recipe)
+
+# Known order first, then any remaining alphabetically
+ordered_sections = [s for s in SECTION_ORDER if s in sections]
+ordered_sections.extend(sorted(s for s in sections if s not in SECTION_ORDER))
+
+# --- Recipe count ---
+st.caption(f"{len(results)} recipes")
+
+# --- Render sections ---
 COLS_PER_ROW = 4
 
-if page_results:
-    # Process cards in rows of 4
-    for row_start in range(0, len(page_results), COLS_PER_ROW):
-        row_recipes = page_results[row_start : row_start + COLS_PER_ROW]
-        cols = st.columns(COLS_PER_ROW)
+if results:
+    for section_name in ordered_sections:
+        section_recipes = sections[section_name]
+        icon = SECTION_ICONS.get(section_name, "\U0001f372")
+        st.markdown(f"### {icon} {section_name}")
+        st.caption(f"{len(section_recipes)} recipes")
 
-        for col, recipe in zip(cols, row_recipes):
-            is_pinned = recipe["id"] in pinned
-            recipe_id = recipe["id"]
+        for row_start in range(0, len(section_recipes), COLS_PER_ROW):
+            row_recipes = section_recipes[row_start : row_start + COLS_PER_ROW]
+            cols = st.columns(COLS_PER_ROW)
 
-            with col:
-                with st.container(border=True):
-                    is_viewing = st.session_state.get("viewing_recipe") == recipe_id
-                    arrow = "▼" if is_viewing else "▶"
-                    if st.button(
-                        f"{arrow} {recipe['title']}",
-                        key=f"view_{recipe_id}",
-                        use_container_width=True,
-                        type="tertiary",
-                    ):
-                        if st.session_state.get("viewing_recipe") == recipe_id:
-                            del st.session_state["viewing_recipe"]
-                        else:
-                            st.session_state.viewing_recipe = recipe_id
-                        st.rerun()
+            for col, recipe in zip(cols, row_recipes):
+                is_pinned = recipe["id"] in pinned
+                recipe_id = recipe["id"]
 
-                    st.caption(recipe["protein"])
-                    if recipe.get("tags"):
-                        st.caption(", ".join(recipe["tags"]))
-
-                    checked = st.checkbox(
-                        "Pin",
-                        value=is_pinned,
-                        key=f"pin_{recipe_id}",
-                    )
-                    if checked and not is_pinned:
-                        st.session_state.pinned_recipes[recipe_id] = recipe["title"]
-                        st.rerun()
-                    elif not checked and is_pinned:
-                        del st.session_state.pinned_recipes[recipe_id]
-                        st.rerun()
-
-        # --- Inline detail panel (below the row that contains the clicked card) ---
-        for recipe in row_recipes:
-            if st.session_state.get("viewing_recipe") == recipe["id"]:
-                details = get_recipe_details(conn, recipe["id"])
-                if details:
+                with col:
                     with st.container(border=True):
-                        info_col, ing_col = st.columns(2)
-                        with info_col:
-                            st.markdown(f"**Protein:** {details['protein']}")
-                            st.markdown(f"**Servings:** {details.get('servings') or 4}")
-                            if details.get("prep_notes"):
-                                st.markdown(f"**Prep:** {details['prep_notes']}")
-                            if details.get("tags"):
-                                tag_html = " ".join(
-                                    f'<span style="background:rgba(128,128,128,0.12);'
-                                    f'border-radius:4px;padding:2px 8px;'
-                                    f'font-size:0.75rem">{t}</span>'
-                                    for t in details["tags"]
-                                )
-                                st.markdown(tag_html, unsafe_allow_html=True)
-                        with ing_col:
-                            lines = []
-                            for ing in details["ingredients"]:
-                                optional = " *(optional)*" if ing["is_optional"] else ""
-                                qty_str = ""
-                                if ing.get("qty"):
-                                    q = ing["qty"]
-                                    qty_str = (
-                                        str(int(q))
-                                        if q == int(q)
-                                        else f"{q:.2f}".rstrip("0").rstrip(".")
-                                    )
-                                    if ing.get("unit"):
-                                        qty_str = f"{qty_str} {ing['unit']}"
-                                    qty_str += " "
-                                lines.append(f"- {qty_str}{ing['raw_text']}{optional}")
-                            st.markdown("**Ingredients:**\n" + "\n".join(lines))
+                        # Top row: title + pin icon
+                        title_col, pin_col = st.columns([5, 1])
+                        with title_col:
+                            if st.button(
+                                recipe["title"],
+                                key=f"view_{recipe_id}",
+                                use_container_width=True,
+                                type="tertiary",
+                            ):
+                                if st.session_state.get("viewing_recipe") == recipe_id:
+                                    del st.session_state["viewing_recipe"]
+                                else:
+                                    st.session_state.viewing_recipe = recipe_id
+                                st.rerun()
+                        with pin_col:
+                            pin_icon = "\U0001f4cc" if is_pinned else "\U0001f4cc"
+                            btn_type = "secondary" if is_pinned else "tertiary"
+                            if st.button(
+                                pin_icon,
+                                key=f"pin_{recipe_id}",
+                                type=btn_type,
+                                help="Unpin" if is_pinned else "Pin to meal plan",
+                            ):
+                                if is_pinned:
+                                    del st.session_state.pinned_recipes[recipe_id]
+                                else:
+                                    st.session_state.pinned_recipes[recipe_id] = recipe["title"]
+                                st.rerun()
 
-    # --- Page navigation ---
-    if total_pages > 1:
-        prev_col, page_col, next_col = st.columns([1, 2, 1])
-        with prev_col:
-            if st.button("Previous", disabled=(page == 0), use_container_width=True):
-                st.session_state.recipe_page = page - 1
-                st.rerun()
-        with page_col:
-            st.markdown(
-                f'<div style="text-align:center;padding-top:0.5rem">'
-                f'Page {page + 1} of {total_pages}</div>',
-                unsafe_allow_html=True,
-            )
-        with next_col:
-            if st.button("Next", disabled=(page >= total_pages - 1), use_container_width=True):
-                st.session_state.recipe_page = page + 1
-                st.rerun()
+                        if recipe.get("tags"):
+                            display_tags = [
+                                t for t in recipe["tags"]
+                                if not t.rstrip("min").isdigit()
+                            ]
+                            if display_tags:
+                                st.caption(", ".join(display_tags))
+
+            # --- Inline detail panel (below the row containing the clicked card) ---
+            for recipe in row_recipes:
+                if st.session_state.get("viewing_recipe") == recipe["id"]:
+                    details = get_recipe_details(conn, recipe["id"])
+                    if details:
+                        with st.container(border=True):
+                            info_col, ing_col = st.columns(2)
+                            with info_col:
+                                st.markdown(f"**Protein:** {details['protein']}")
+                                st.markdown(f"**Servings:** {details.get('servings') or 4}")
+                                if details.get("prep_notes"):
+                                    st.markdown(f"**Prep:** {details['prep_notes']}")
+                                if details.get("tags"):
+                                    tag_html = " ".join(
+                                        f'<span style="background:rgba(128,128,128,0.12);'
+                                        f'border-radius:4px;padding:2px 8px;'
+                                        f'font-size:0.75rem">{t}</span>'
+                                        for t in details["tags"]
+                                    )
+                                    st.markdown(tag_html, unsafe_allow_html=True)
+                            with ing_col:
+                                lines = []
+                                for ing in details["ingredients"]:
+                                    optional = " *(optional)*" if ing["is_optional"] else ""
+                                    qty_str = ""
+                                    if ing.get("qty"):
+                                        q = ing["qty"]
+                                        qty_str = (
+                                            str(int(q))
+                                            if q == int(q)
+                                            else f"{q:.2f}".rstrip("0").rstrip(".")
+                                        )
+                                        if ing.get("unit"):
+                                            qty_str = f"{qty_str} {ing['unit']}"
+                                        qty_str += " "
+                                    lines.append(f"- {qty_str}{ing['raw_text']}{optional}")
+                                st.markdown("**Ingredients:**\n" + "\n".join(lines))
 
 else:
     st.info("No recipes match the current filters.")

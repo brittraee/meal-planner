@@ -188,6 +188,131 @@ class TestShoppingList:
         bacon_items = [i for i in items if i["normalized_name"] == "bacon"]
         assert len(bacon_items) == 0
 
+    def test_shopping_list_scales_by_servings(self, db):
+        """When plan_servings differs from recipe_servings, quantities scale."""
+        insert_recipe_dict(db, {
+            "id": "test_scaling",
+            "title": "Scaling Test",
+            "protein": "chicken",
+            "servings": 4,
+            "ingredients": [
+                {"raw_text": "2 lb chicken", "normalized_name": "chicken",
+                 "qty": 2.0, "unit": "lb", "is_optional": False},
+                {"raw_text": "1 cup rice", "normalized_name": "rice",
+                 "qty": 1.0, "unit": "cup", "is_optional": False},
+            ],
+            "tags": [],
+        })
+        db.commit()
+        # Plan with 8 servings (2x the recipe's 4)
+        meals = [(1, "Meal 1", "test_scaling", 8)]
+        plan_id = create_meal_plan(db, "Scale Test", "2026-02-17", meals)
+        items = get_shopping_list(db, plan_id)
+        chicken = [i for i in items if i["normalized_name"] == "chicken"][0]
+        rice = [i for i in items if i["normalized_name"] == "rice"][0]
+        assert chicken["qty"] == 4.0  # 2 lb * (8/4) = 4 lb
+        assert rice["qty"] == 2.0  # 1 cup * (8/4) = 2 cups
+
+    def test_shopping_list_scales_down(self, db):
+        """Scaling works when plan_servings is less than recipe_servings."""
+        insert_recipe_dict(db, {
+            "id": "test_scale_down",
+            "title": "Scale Down Test",
+            "protein": "beef",
+            "servings": 4,
+            "ingredients": [
+                {"raw_text": "2 lb ground beef", "normalized_name": "ground beef",
+                 "qty": 2.0, "unit": "lb", "is_optional": False},
+            ],
+            "tags": [],
+        })
+        db.commit()
+        # Plan with 2 servings (half the recipe's 4)
+        meals = [(1, "Meal 1", "test_scale_down", 2)]
+        plan_id = create_meal_plan(db, "Half Test", "2026-02-17", meals)
+        items = get_shopping_list(db, plan_id)
+        beef = [i for i in items if i["normalized_name"] == "ground beef"][0]
+        assert beef["qty"] == 1.0  # 2 lb * (2/4) = 1 lb
+
+    def test_shopping_list_no_scaling_when_same_servings(self, db):
+        """Quantities stay the same when plan matches recipe servings."""
+        insert_recipe_dict(db, {
+            "id": "test_same_servings",
+            "title": "Same Servings Test",
+            "protein": "chicken",
+            "servings": 4,
+            "ingredients": [
+                {"raw_text": "3 chicken thighs", "normalized_name": "chicken thigh",
+                 "qty": 3.0, "unit": None, "is_optional": False},
+            ],
+            "tags": [],
+        })
+        db.commit()
+        meals = [(1, "Meal 1", "test_same_servings", 4)]
+        plan_id = create_meal_plan(db, "Same Test", "2026-02-17", meals)
+        items = get_shopping_list(db, plan_id)
+        chicken = [i for i in items if i["normalized_name"] == "chicken thigh"][0]
+        assert chicken["qty"] == 3.0  # unchanged
+
+    def test_shopping_list_no_servings_override_no_scaling(self, db):
+        """When plan_servings is NULL, no scaling occurs."""
+        insert_recipe_dict(db, {
+            "id": "test_null_servings",
+            "title": "Null Servings Test",
+            "protein": "pork",
+            "servings": 4,
+            "ingredients": [
+                {"raw_text": "1 lb pork", "normalized_name": "pork",
+                 "qty": 1.0, "unit": "lb", "is_optional": False},
+            ],
+            "tags": [],
+        })
+        db.commit()
+        # No servings in tuple — should be NULL
+        meals = [(1, "Meal 1", "test_null_servings")]
+        plan_id = create_meal_plan(db, "Null Test", "2026-02-17", meals)
+        items = get_shopping_list(db, plan_id)
+        pork = [i for i in items if i["normalized_name"] == "pork"][0]
+        assert pork["qty"] == 1.0  # unchanged, no scaling
+
+    def test_shopping_list_scales_and_aggregates(self, db):
+        """Two recipes using same ingredient, both scaled, should sum."""
+        insert_recipe_dict(db, {
+            "id": "test_agg_a",
+            "title": "Recipe A",
+            "protein": "chicken",
+            "servings": 2,
+            "ingredients": [
+                {"raw_text": "1 cup rice", "normalized_name": "rice",
+                 "qty": 1.0, "unit": "cup", "is_optional": False},
+            ],
+            "tags": [],
+        })
+        insert_recipe_dict(db, {
+            "id": "test_agg_b",
+            "title": "Recipe B",
+            "protein": "beef",
+            "servings": 2,
+            "ingredients": [
+                {"raw_text": "2 cup rice", "normalized_name": "rice",
+                 "qty": 2.0, "unit": "cup", "is_optional": False},
+            ],
+            "tags": [],
+        })
+        db.commit()
+        # Both planned at 4 servings (2x each recipe's base of 2)
+        meals = [
+            (1, "Meal 1", "test_agg_a", 4),
+            (2, "Meal 2", "test_agg_b", 4),
+        ]
+        plan_id = create_meal_plan(db, "Agg Test", "2026-02-17", meals)
+        items = get_shopping_list(db, plan_id)
+        rice = [i for i in items if i["normalized_name"] == "rice"][0]
+        # Recipe A: 1 cup * (4/2) = 2 cups
+        # Recipe B: 2 cups * (4/2) = 4 cups
+        # Total: 6 cups
+        assert rice["qty"] == 6.0
+
 
 class TestUserSettings:
     def test_has_completed_onboarding_empty_db(self, db):

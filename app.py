@@ -205,7 +205,6 @@ def _main_app():
             ],
             "Manage": [
                 st.Page("pages/4_pantry.py", title="Pantry", icon="\U0001f3ea"),
-                st.Page("pages/5_history.py", title="History", icon="\U0001f4ca"),
                 st.Page("pages/6_add_recipe.py", title="Add Recipe", icon="\u2795"),
             ],
         }
