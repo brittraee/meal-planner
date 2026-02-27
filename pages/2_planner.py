@@ -15,12 +15,25 @@ from src.planner import generate_plan, pick_replacement
 
 st.title("Meal Planner")
 st.caption(
-    "Generate a balanced meal plan. Pin recipes from the Recipe Browser, "
-    "or let the planner choose for you."
+    "Generate a balanced week of dinners. "
+    "Pin favorites or let the planner choose."
 )
 
 conn = get_connection()
 init_db(conn)
+
+# --- Sidebar: workflow guide ---
+with st.sidebar:
+    st.markdown("### Quick Start")
+    st.caption(
+        "Generate → swap any meal → adjust servings → save. "
+        "Pin recipes from the library to lock them in."
+    )
+    st.page_link(
+        "pages/1_recipes.py",
+        label="Pin Recipes",
+        icon=":material/menu_book:",
+    )
 
 # Load user preferences from onboarding
 _settings = get_user_settings(conn)
@@ -92,9 +105,14 @@ if pinned:
                 f"You have {len(pinned)} pins but only {num_days} meals. "
                 "Some may be dropped."
             )
+else:
+    st.caption(
+        "No pinned recipes — the planner will pick for you. "
+        "Or pin specific recipes from the Recipe Browser."
+    )
 
 # --- Generate plan ---
-if st.button("Generate Plan", type="primary", use_container_width=True):
+if st.button("Generate Plan", type="secondary", use_container_width=True):
     try:
         plan_df = generate_plan(
             conn,

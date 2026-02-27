@@ -31,7 +31,7 @@ class TestParseIngredientLine:
         assert name == "ground beef"
 
     def test_range(self):
-        qty, unit, name = parse_ingredient_line("8 to 12 flour tortillas")
+        qty, _unit, name = parse_ingredient_line("8 to 12 flour tortillas")
         assert qty == 10.0
         assert "tortilla" in name
 
@@ -50,12 +50,12 @@ class TestParseIngredientLine:
         assert name == "chicken breast"
 
     def test_no_quantity(self):
-        qty, unit, name = parse_ingredient_line("salt and pepper to taste")
+        qty, unit, _name = parse_ingredient_line("salt and pepper to taste")
         assert qty is None
         assert unit is None
 
     def test_empty(self):
-        qty, unit, name = parse_ingredient_line("")
+        qty, _unit, _name = parse_ingredient_line("")
         assert qty is None
 
     def test_descriptors_stripped(self):

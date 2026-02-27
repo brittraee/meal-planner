@@ -14,9 +14,23 @@ from src.database import (
 from src.scraper import scrape_recipe
 
 st.title("Add Recipe")
+st.caption("Import from a URL or add one manually.")
 
 conn = get_connection()
 init_db(conn)
+
+# --- Sidebar: workflow guide ---
+with st.sidebar:
+    st.markdown("### Quick Start")
+    st.caption(
+        "Paste a URL to auto-import, or add one manually. "
+        "New recipes show up in the library right away."
+    )
+    st.page_link(
+        "pages/1_recipes.py",
+        label="Recipe Library",
+        icon=":material/menu_book:",
+    )
 
 tab_url, tab_manual = st.tabs(["Import from URL", "Manual Entry"])
 

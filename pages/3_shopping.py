@@ -12,14 +12,36 @@ from src.shopping import (
 )
 
 st.title("Shopping List")
+st.caption("Grouped by store section, pantry items filtered out.")
 
 conn = get_connection()
 init_db(conn)
 
+# --- Sidebar: workflow guide ---
+with st.sidebar:
+    st.markdown("### Quick Start")
+    st.caption(
+        "Pick a plan, check off items as you shop. "
+        "Pantry items are already filtered out."
+    )
+    st.page_link(
+        "pages/4_pantry.py",
+        label="Manage Pantry",
+        icon=":material/grocery:",
+    )
+
 # --- Select plan ---
 plans = get_meal_plans(conn)
 if not plans:
-    st.info("No meal plans saved yet. Create one in the Meal Planner page.")
+    st.info(
+        "No meal plans saved yet. Head to the **Meal Planner** to generate "
+        "and save a plan — your shopping list will appear here."
+    )
+    st.page_link(
+        "pages/2_planner.py",
+        label="Go to Meal Planner",
+        icon=":material/calendar_month:",
+    )
     st.stop()
 
 plan_options = {f"{p['name']} ({p['meal_count']} meals)": p["id"] for p in plans}

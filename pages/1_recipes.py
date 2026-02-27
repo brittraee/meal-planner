@@ -29,7 +29,7 @@ st.markdown(
     [data-testid="stVerticalBlockBorderWrapper"]:has([data-testid="stBaseButton-tertiary"]) {
         position: relative;
         cursor: pointer;
-        padding: 0.25rem;
+        padding: 0.5rem;
         border-radius: 8px;
         transition: background-color 0.15s ease, border-color 0.15s ease;
     }
@@ -38,12 +38,12 @@ st.markdown(
         border-color: rgba(128, 128, 128, 0.25);
     }
 
-    /* Pinned card: subtle tint + stronger border */
+    /* Pinned card: gold tint using app accent */
     [data-testid="stVerticalBlockBorderWrapper"]:has(
         button[data-testid="stBaseButton-secondary"]:not([kind="tertiary"])
     ) {
-        background-color: rgba(46, 134, 193, 0.06);
-        border-color: rgba(46, 134, 193, 0.3);
+        background-color: rgba(203, 158, 33, 0.08);
+        border-color: rgba(203, 158, 33, 0.4);
     }
 
     /* Stretch title button click area to fill card */
@@ -88,8 +88,8 @@ st.markdown(
 
 st.title("Recipe Browser")
 st.caption(
-    "Click any recipe to see ingredients and prep details. "
-    "Pin recipes to lock them into your meal plan."
+    "Filter by protein, tags, or keyword. "
+    "Click a card for details, pin favorites for your meal plan."
 )
 
 conn = get_connection()
@@ -188,6 +188,21 @@ SECTION_ORDER = [
     "Fish", "Shrimp", "Seafood", "Vegetarian", "Vegan", "Side",
 ]
 
+# Accent colors per section (warm for meat, cool for seafood, green for plant)
+SECTION_COLORS = {
+    "Breakfast": "#FFD54F",
+    "Chicken": "#E8985A",
+    "Beef": "#C45B4A",
+    "Pork": "#D4785C",
+    "Turkey": "#B8784E",
+    "Fish": "#4A90A4",
+    "Shrimp": "#5BA0B5",
+    "Seafood": "#3D8B99",
+    "Vegetarian": "#6ABF69",
+    "Vegan": "#4CAF50",
+    "Side": "#8DB580",
+}
+
 
 def _get_section(recipe: dict) -> str:
     """Determine which section a recipe belongs to."""
@@ -211,12 +226,18 @@ ordered_sections.extend(sorted(s for s in sections if s not in SECTION_ORDER))
 st.caption(f"{len(results)} recipes")
 
 # --- Render sections ---
-COLS_PER_ROW = 4
+COLS_PER_ROW = 3
 
 if results:
     for section_name in ordered_sections:
         section_recipes = sections[section_name]
         icon = SECTION_ICONS.get(section_name, "\U0001f372")
+        color = SECTION_COLORS.get(section_name, "#888")
+        st.markdown(
+            f'<div style="height:3px;background:{color};'
+            f'border-radius:2px;margin-bottom:-0.6rem"></div>',
+            unsafe_allow_html=True,
+        )
         with st.expander(
             f"{icon} {section_name} ({len(section_recipes)})", expanded=False
         ):
@@ -229,51 +250,51 @@ if results:
                     recipe_id = recipe["id"]
 
                     with col, st.container(border=True):
-                            # Top row: title + pin icon
-                            title_col, pin_col = st.columns([5, 1])
-                            with title_col:
-                                is_viewing = st.session_state.get("viewing_recipe") == recipe_id
-                                arrow = "\u25BC" if is_viewing else "\u25B6"
-                                if st.button(
-                                    f"{arrow} {recipe['title']}",
-                                    key=f"view_{recipe_id}",
-                                    use_container_width=True,
-                                    type="tertiary",
-                                ):
-                                    if st.session_state.get("viewing_recipe") == recipe_id:
-                                        del st.session_state["viewing_recipe"]
-                                    else:
-                                        st.session_state.viewing_recipe = recipe_id
-                                    st.rerun()
-                            with pin_col:
-                                btn_type = "secondary" if is_pinned else "tertiary"
-                                pin_icon = ":material/push_pin:" if is_pinned else ":material/keep:"
-                                if st.button(
-                                    "",
-                                    key=f"pin_{recipe_id}",
-                                    type=btn_type,
-                                    icon=pin_icon,
-                                    help="Unpin" if is_pinned else "Pin to meal plan",
-                                ):
-                                    if is_pinned:
-                                        del st.session_state.pinned_recipes[recipe_id]
-                                    else:
-                                        st.session_state.pinned_recipes[recipe_id] = recipe["title"]
-                                    st.rerun()
+                        # Top row: title + pin icon
+                        title_col, pin_col = st.columns([5, 1])
+                        with title_col:
+                            is_viewing = st.session_state.get("viewing_recipe") == recipe_id
+                            arrow = "\u25BC\u2002" if is_viewing else "\u25B6\u2002"
+                            if st.button(
+                                f"{arrow} {recipe['title']}",
+                                key=f"view_{recipe_id}",
+                                use_container_width=True,
+                                type="tertiary",
+                            ):
+                                if st.session_state.get("viewing_recipe") == recipe_id:
+                                    del st.session_state["viewing_recipe"]
+                                else:
+                                    st.session_state.viewing_recipe = recipe_id
+                                st.rerun()
+                        with pin_col:
+                            btn_type = "secondary" if is_pinned else "tertiary"
+                            pin_icon = ":material/push_pin:" if is_pinned else ":material/keep:"
+                            if st.button(
+                                "",
+                                key=f"pin_{recipe_id}",
+                                type=btn_type,
+                                icon=pin_icon,
+                                help="Unpin" if is_pinned else "Pin to meal plan",
+                            ):
+                                if is_pinned:
+                                    del st.session_state.pinned_recipes[recipe_id]
+                                else:
+                                    st.session_state.pinned_recipes[recipe_id] = recipe["title"]
+                                st.rerun()
 
-                            if recipe.get("tags"):
-                                display_tags = [
-                                    t for t in recipe["tags"]
-                                    if not t.rstrip("min").isdigit()
-                                ]
-                                if display_tags:
-                                    tag_html = " ".join(
-                                        f"<span>{t}</span>" for t in display_tags
-                                    )
-                                    st.markdown(
-                                        f'<div class="recipe-tags">{tag_html}</div>',
-                                        unsafe_allow_html=True,
-                                    )
+                        if recipe.get("tags"):
+                            display_tags = [
+                                t for t in recipe["tags"]
+                                if not t.rstrip("min").isdigit()
+                            ]
+                            if display_tags:
+                                tag_html = " ".join(
+                                    f"<span>{t}</span>" for t in display_tags
+                                )
+                                st.markdown(
+                                    f'<div class="recipe-tags">{tag_html}</div>',
+                                    unsafe_allow_html=True,
+                                )
 
                 # --- Inline detail panel (below the row containing the clicked card) ---
                 for recipe in row_recipes:
