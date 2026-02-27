@@ -555,6 +555,15 @@ def get_user_settings(conn: sqlite3.Connection) -> dict[str, Any] | None:
     return dict(row) if row else None
 
 
+def clear_user_data(conn: sqlite3.Connection) -> None:
+    """Clear user data (settings, pantry, plans). Keeps recipe library."""
+    conn.execute("DELETE FROM planned_meals")
+    conn.execute("DELETE FROM meal_plans")
+    conn.execute("DELETE FROM pantry_items")
+    conn.execute("DELETE FROM user_settings")
+    conn.commit()
+
+
 def save_user_settings(
     conn: sqlite3.Connection,
     servings: int,

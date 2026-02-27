@@ -17,10 +17,10 @@ st.markdown(
     <style>
     /* ---- Recipe card styling ---- */
 
-    /* Left-align clickable recipe titles */
+    /* Center clickable recipe titles */
     [data-testid="stBaseButton-tertiary"] button {
-        text-align: left;
-        justify-content: flex-start;
+        text-align: center;
+        justify-content: center;
         font-size: 1rem;
         font-weight: 500;
     }
@@ -222,7 +222,18 @@ for recipe in results:
 ordered_sections = [s for s in SECTION_ORDER if s in sections]
 ordered_sections.extend(sorted(s for s in sections if s not in SECTION_ORDER))
 
-# --- Recipe count ---
+# --- Active filters + recipe count ---
+active = []
+if selected_protein != "All":
+    active.append(f"Protein: {selected_protein}")
+if selected_tags:
+    active.append(f"Tags: {', '.join(selected_tags)}")
+if selected_time != "Any":
+    active.append(f"Max: {selected_time}")
+if search_text:
+    active.append(f'"{search_text}"')
+if active:
+    st.caption("Filtering by: " + " \u00b7 ".join(active))
 st.caption(f"{len(results)} recipes")
 
 # --- Render sections ---
@@ -250,18 +261,26 @@ if results:
                     recipe_id = recipe["id"]
 
                     with col, st.container(border=True):
-                        # Top row: title + pin icon
-                        title_col, pin_col = st.columns([5, 1])
+                        # Top row: arrow + title + pin icon
+                        is_viewing = st.session_state.get("viewing_recipe") == recipe_id
+                        arrow = "\u25BC" if is_viewing else "\u25B6"
+                        arrow_col, title_col, pin_col = st.columns(
+                            [0.5, 5, 0.5]
+                        )
+                        with arrow_col:
+                            st.markdown(
+                                f'<div style="text-align:center;padding-top:0.35rem;'
+                                f'font-size:0.7rem;opacity:0.5">{arrow}</div>',
+                                unsafe_allow_html=True,
+                            )
                         with title_col:
-                            is_viewing = st.session_state.get("viewing_recipe") == recipe_id
-                            arrow = "\u25BC\u2002" if is_viewing else "\u25B6\u2002"
                             if st.button(
-                                f"{arrow} {recipe['title']}",
+                                recipe["title"],
                                 key=f"view_{recipe_id}",
                                 use_container_width=True,
                                 type="tertiary",
                             ):
-                                if st.session_state.get("viewing_recipe") == recipe_id:
+                                if is_viewing:
                                     del st.session_state["viewing_recipe"]
                                 else:
                                     st.session_state.viewing_recipe = recipe_id
@@ -282,20 +301,6 @@ if results:
                                     st.session_state.pinned_recipes[recipe_id] = recipe["title"]
                                 st.rerun()
 
-                        if recipe.get("tags"):
-                            display_tags = [
-                                t for t in recipe["tags"]
-                                if not t.rstrip("min").isdigit()
-                            ]
-                            if display_tags:
-                                tag_html = " ".join(
-                                    f"<span>{t}</span>" for t in display_tags
-                                )
-                                st.markdown(
-                                    f'<div class="recipe-tags">{tag_html}</div>',
-                                    unsafe_allow_html=True,
-                                )
-
                 # --- Inline detail panel (below the row containing the clicked card) ---
                 for recipe in row_recipes:
                     if st.session_state.get("viewing_recipe") == recipe["id"]:
@@ -306,8 +311,6 @@ if results:
                                 with info_col:
                                     st.markdown(f"**Protein:** {details['protein']}")
                                     st.markdown(f"**Servings:** {details.get('servings') or 4}")
-                                    if details.get("prep_notes"):
-                                        st.markdown(f"**Prep:** {details['prep_notes']}")
                                     if details.get("tags"):
                                         tag_html = " ".join(
                                             f"<span>{t}</span>"

@@ -43,6 +43,15 @@ def backfill_recipe(conn, recipe_id: str, url: str, dry_run: bool = False) -> di
     """
     result = {"recipe_id": recipe_id, "url": url, "status": "ok", "details": ""}
 
+    # Skip if recipe doesn't exist in DB (orphaned URL entry)
+    exists = conn.execute(
+        "SELECT 1 FROM recipes WHERE id = ?", (recipe_id,)
+    ).fetchone()
+    if not exists:
+        result["status"] = "skipped"
+        result["details"] = "Recipe not in database"
+        return result
+
     try:
         scraped = scrape_recipe(url)
     except Exception as e:
@@ -133,6 +142,8 @@ def main():
             print(f"    ✓ {result['details']}")
         elif result["status"] == "dry_run":
             print(f"    ~ {result['details']}")
+        elif result["status"] == "skipped":
+            print(f"    ⊘ {result['details']}")
         else:
             print(f"    ✗ {result['status']}: {result['details']}")
 

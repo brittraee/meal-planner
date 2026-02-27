@@ -2,6 +2,7 @@
 
 from src.database import (
     add_pantry_item,
+    clear_user_data,
     create_meal_plan,
     delete_meal_plan,
     delete_pantry_item,
@@ -331,3 +332,24 @@ class TestUserSettings:
         assert settings is not None
         assert settings["servings"] == 4
         assert settings["meals_per_week"] == 5
+
+
+class TestClearUserData:
+    def test_clears_settings_pantry_plans(self, db_with_recipes):
+        save_user_settings(db_with_recipes, 4, 5)
+        add_pantry_item(db_with_recipes, "Rice", "rice", "staples")
+        meals = [(1, "Monday", "01_Chicken_Fajitas")]
+        create_meal_plan(db_with_recipes, "Test Week", "2026-02-17", meals)
+
+        clear_user_data(db_with_recipes)
+
+        assert has_completed_onboarding(db_with_recipes) is False
+        assert len(get_pantry_items(db_with_recipes)) == 0
+        assert len(get_meal_plans(db_with_recipes)) == 0
+
+    def test_preserves_recipes(self, db_with_recipes):
+        save_user_settings(db_with_recipes, 4, 5)
+        clear_user_data(db_with_recipes)
+
+        recipes = get_all_recipes(db_with_recipes)
+        assert len(recipes) == 7  # all sample recipes still there

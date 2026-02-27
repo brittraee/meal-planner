@@ -3,6 +3,7 @@
 import streamlit as st
 
 from src.database import (
+    clear_user_data,
     get_connection,
     get_pantry_items,
     get_user_settings,
@@ -48,3 +49,54 @@ st.page_link(
     label="Manage Pantry",
     icon=":material/grocery:",
 )
+
+# --- Reset section ---
+st.divider()
+st.markdown("### Reset")
+
+reset_col, clear_col = st.columns(2)
+
+with reset_col:
+    if st.button(
+        "Reset Preferences",
+        icon=":material/restart_alt:",
+        help="Reset servings and meals per week to defaults",
+    ):
+        save_user_settings(conn, 4, 5)
+        st.toast("Preferences reset to defaults.")
+        st.rerun()
+
+with clear_col:
+    if st.button(
+        "Clear All Data",
+        type="primary",
+        icon=":material/delete_forever:",
+        help="Remove settings, pantry, and meal plans. Keeps your recipe library.",
+    ):
+        st.session_state.confirm_clear = True
+
+if st.session_state.get("confirm_clear"):
+
+    @st.dialog("Clear all data?")
+    def _confirm_clear():
+        st.warning(
+            "This removes your settings, pantry items, and meal plans. "
+            "Your recipe library stays intact."
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Cancel", use_container_width=True):
+                st.session_state.confirm_clear = False
+                st.rerun()
+        with col2:
+            if st.button(
+                "Clear Everything",
+                type="primary",
+                use_container_width=True,
+            ):
+                clear_user_data(conn)
+                st.session_state.confirm_clear = False
+                st.toast("All user data cleared.")
+                st.rerun()
+
+    _confirm_clear()

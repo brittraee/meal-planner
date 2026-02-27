@@ -76,6 +76,42 @@ class TestParseIngredientLine:
         assert unit is None
         assert name == "onion"
 
+    def test_unicode_fraction(self):
+        qty, unit, name = parse_ingredient_line("\u00bd cup flour")
+        assert qty == 0.5
+        assert unit == "cup"
+        assert name == "flour"
+
+    def test_mixed_unicode_fraction(self):
+        qty, unit, name = parse_ingredient_line("1\u00bd lbs chicken")
+        assert qty == 1.5
+        assert unit == "lb"
+        assert name == "chicken"
+
+    def test_pricing_stripped(self):
+        qty, unit, name = parse_ingredient_line("\u00bc cup olive oil ($0.88)")
+        assert qty == 0.25
+        assert unit == "cup"
+        assert name == "olive oil"
+
+    def test_dual_unit_prefers_imperial(self):
+        qty, unit, name = parse_ingredient_line("1 kg / 2 lb chicken")
+        assert qty == 2.0
+        assert unit == "lb"
+        assert name == "chicken"
+
+    def test_metric_conversion_grams(self):
+        qty, unit, name = parse_ingredient_line("400 g spaghetti")
+        assert 14.0 < qty < 14.2
+        assert unit == "oz"
+        assert name == "spaghetti"
+
+    def test_metric_conversion_ml(self):
+        qty, unit, name = parse_ingredient_line("237 ml water")
+        assert 0.9 < qty < 1.1
+        assert unit == "cup"
+        assert name == "water"
+
 
 class TestSlugify:
     def test_basic(self):

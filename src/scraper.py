@@ -12,6 +12,63 @@ from recipe_scrapers import scrape_html
 
 from src.ingredients import normalize
 
+# Unicode fraction characters → ASCII equivalents
+_UNICODE_FRACTIONS: dict[str, str] = {
+    "\u00bd": "1/2",  # ½
+    "\u00bc": "1/4",  # ¼
+    "\u00be": "3/4",  # ¾
+    "\u2153": "1/3",  # ⅓
+    "\u2154": "2/3",  # ⅔
+    "\u2155": "1/5",  # ⅕
+    "\u2156": "2/5",  # ⅖
+    "\u2157": "3/5",  # ⅗
+    "\u2158": "4/5",  # ⅘
+    "\u2159": "1/6",  # ⅙
+    "\u215a": "5/6",  # ⅚
+    "\u215b": "1/8",  # ⅛
+    "\u215c": "3/8",  # ⅜
+    "\u215d": "5/8",  # ⅝
+    "\u215e": "7/8",  # ⅞
+}
+
+# Regex for pricing text: ($0.88), $6.26, $6.26)
+_PRICE_RE = re.compile(r"\(\$[\d.]+\)|\$[\d.]+\)?")
+
+# Dual metric/imperial: "1 kg / 2 lb" or "500 g / 1 lb"
+_DUAL_UNIT_RE = re.compile(
+    r"^([\d.]+)\s*(g|kg|ml|L)\s*/\s*([\d./ ]+)\s*(oz|lb|lbs|cup|cups|tbsp|tsp)\s+(.*)",
+    re.IGNORECASE,
+)
+
+# Metric units to convert
+_METRIC_CONVERSIONS: dict[str, tuple[str, float]] = {
+    "g": ("oz", 1 / 28.35),
+    "kg": ("lb", 2.205),
+    "ml": ("cup", 1 / 237),
+    "L": ("cup", 4.227),
+}
+
+
+def _normalize_unicode(text: str) -> str:
+    """Replace unicode fraction chars with ASCII equivalents."""
+    for char, replacement in _UNICODE_FRACTIONS.items():
+        if char in text:
+            # Handle combined forms like "1½" → "1 1/2"
+            text = re.sub(rf"(\d){re.escape(char)}", rf"\1 {replacement}", text)
+            text = text.replace(char, replacement)
+    return text
+
+
+def _to_imperial(qty: float | None, unit: str | None) -> tuple[float | None, str | None]:
+    """Convert metric qty/unit to imperial if applicable."""
+    if qty is None or unit is None:
+        return qty, unit
+    if unit in _METRIC_CONVERSIONS:
+        imperial_unit, factor = _METRIC_CONVERSIONS[unit]
+        return round(qty * factor, 2), imperial_unit
+    return qty, unit
+
+
 _USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -122,6 +179,16 @@ def parse_ingredient_line(line: str) -> tuple[float | None, str | None, str]:
     """
     text = line.strip()
 
+    # Normalize unicode fractions and strip pricing text
+    text = _normalize_unicode(text)
+    text = _PRICE_RE.sub("", text).strip()
+
+    # Dual metric/imperial: prefer imperial side
+    dual = _DUAL_UNIT_RE.match(text)
+    if dual:
+        imp_qty_str, imp_unit, rest = dual.group(3), dual.group(4), dual.group(5)
+        text = f"{imp_qty_str} {imp_unit} {rest}"
+
     # Try range pattern first: "1 to 2 cups flour"
     range_match = _RANGE_RE.match(text)
     if range_match:
@@ -137,6 +204,7 @@ def parse_ingredient_line(line: str) -> tuple[float | None, str | None, str]:
             else:
                 unit = None
                 name = _clean_name(rest)
+            qty, unit = _to_imperial(qty, unit)
             return qty, unit, normalize(name) if name else normalize(rest)
         except (ValueError, ZeroDivisionError):
             pass
@@ -180,6 +248,7 @@ def parse_ingredient_line(line: str) -> tuple[float | None, str | None, str]:
             unit = None
             name = ""
 
+        qty, unit = _to_imperial(qty, unit)
         return qty, unit, normalize(name) if name else ""
 
     return None, None, normalize(_clean_name(text))
