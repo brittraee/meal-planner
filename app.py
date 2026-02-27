@@ -67,7 +67,6 @@ def _onboard_welcome():
     st.caption("Plan smarter. Shop once. Eat well all week.")
 
     with st.form("onboard_welcome"):
-        name = st.text_input("What should we call you?", placeholder="Name")
         servings = st.slider(
             "Default servings per meal",
             min_value=1,
@@ -84,32 +83,33 @@ def _onboard_welcome():
         submitted = st.form_submit_button("Continue", use_container_width=True)
 
     if submitted:
-        if not name.strip():
-            st.error("Please enter a name.")
-            return
         st.session_state.onboard_data = {
-            "name": name.strip(),
             "servings": servings,
             "meals_per_week": meals_per_week,
         }
         st.session_state.onboard_step = 2
         st.rerun()
 
+    st.divider()
+    if st.button("Skip setup — jump to recipes", type="tertiary"):
+        save_user_settings(conn, 4, 5)
+        st.rerun()
+
 
 def _onboard_pantry():
-    data = st.session_state.get("onboard_data", {})
-    st.header(f"Hey {data.get('name', '')} \u2014 what's in your kitchen?")
+    st.header("What's in your kitchen?")
     st.caption("Select ingredients you already have. We'll skip them on grocery lists.")
 
     sections = get_ingredients_by_section()
     tabs = st.tabs(list(sections.keys()))
     selected_all: list[tuple[str, str]] = []  # (display_name, category)
 
-    for tab, (section, items) in zip(tabs, sections.items()):
+    for tab, (section, items) in zip(tabs, sections.items(), strict=False):
         with tab:
-            chosen = st.multiselect(
+            chosen = st.pills(
                 f"Select {section.lower()} items",
                 options=items,
+                selection_mode="multi",
                 key=f"onboard_pantry_{section}",
                 label_visibility="collapsed",
             )
@@ -128,7 +128,7 @@ def _onboard_pantry():
         st.caption(f"**{total_count}** ingredients selected")
 
     st.divider()
-    prioritize_pantry = st.checkbox(
+    st.checkbox(
         "Prioritize recipes that use ingredients I already have",
         value=True,
         help="The meal planner will score recipes higher if they match your pantry items.",
@@ -155,7 +155,7 @@ def _onboard_done():
     pantry_data = st.session_state.get("onboard_pantry", {})
     pantry_count = len(pantry_data.get("selected", [])) + len(pantry_data.get("custom", []))
 
-    st.header(f"You're all set, {data.get('name', '')}!")
+    st.header("You're all set!")
     st.caption("Here's a quick summary of your setup.")
 
     col1, col2, col3 = st.columns(3)
@@ -178,7 +178,7 @@ def _onboard_done():
     st.divider()
     if st.button("Start Planning", use_container_width=True, type="primary"):
         # Write all onboarding data to DB
-        save_user_settings(conn, data["name"], data["servings"], data["meals_per_week"])
+        save_user_settings(conn, data["servings"], data["meals_per_week"])
         for display_name, category in pantry_data.get("selected", []):
             add_pantry_item(conn, display_name, normalize(display_name), category)
         for item in pantry_data.get("custom", []):
@@ -211,7 +211,6 @@ def _main_app():
     )
 
     if settings:
-        st.sidebar.caption(f"Hey {settings['name']}!")
         pantry = get_pantry_items(conn)
         st.sidebar.markdown(
             f"**{settings['servings']}** servings/meal · "

@@ -130,7 +130,7 @@ class TestOnboardingToPantrySubtraction:
 
     def test_onboarding_to_pantry_subtraction(self, db, sample_recipes):
         # Onboard: save user settings
-        save_user_settings(db, "Brittney", 4, 5)
+        save_user_settings(db, 4, 5)
 
         # Insert recipes
         for recipe in sample_recipes:

@@ -12,6 +12,7 @@ venv/
 .mypy_cache/
 output/
 # data/*.db
+data/backfill_log.json
 .env
 *.DS_Store
 

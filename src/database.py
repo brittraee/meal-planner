@@ -67,7 +67,6 @@ CREATE TABLE IF NOT EXISTS pantry_items (
 
 CREATE TABLE IF NOT EXISTS user_settings (
     id INTEGER PRIMARY KEY CHECK (id = 1),
-    name TEXT NOT NULL,
     servings INTEGER DEFAULT 4,
     meals_per_week INTEGER DEFAULT 5,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -558,14 +557,13 @@ def get_user_settings(conn: sqlite3.Connection) -> dict[str, Any] | None:
 
 def save_user_settings(
     conn: sqlite3.Connection,
-    name: str,
     servings: int,
     meals_per_week: int,
 ) -> None:
     """Save or update user settings (single-row table)."""
     conn.execute(
-        """INSERT OR REPLACE INTO user_settings (id, name, servings, meals_per_week)
-           VALUES (1, ?, ?, ?)""",
-        (name, servings, meals_per_week),
+        """INSERT OR REPLACE INTO user_settings (id, servings, meals_per_week)
+           VALUES (1, ?, ?)""",
+        (servings, meals_per_week),
     )
     conn.commit()

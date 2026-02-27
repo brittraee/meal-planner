@@ -66,12 +66,7 @@ with st.expander("Customize"):
             placeholder="e.g. chicken, rice",
         )
     require_included = st.toggle("Strict mode (only show exact matches)", value=False)
-    seed = st.number_input(
-        "Seed (reproduce a plan)",
-        min_value=0,
-        value=0,
-        help="Same number = same plan. Leave at 0 for random.",
-    )
+    seed = 0
 
 excluded_list = [x.strip() for x in excluded.split(",") if x.strip()] if excluded else None
 included_list = [x.strip() for x in included.split(",") if x.strip()] if included else None

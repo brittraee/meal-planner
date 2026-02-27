@@ -208,8 +208,8 @@ class TestShoppingList:
         meals = [(1, "Meal 1", "test_scaling", 8)]
         plan_id = create_meal_plan(db, "Scale Test", "2026-02-17", meals)
         items = get_shopping_list(db, plan_id)
-        chicken = [i for i in items if i["normalized_name"] == "chicken"][0]
-        rice = [i for i in items if i["normalized_name"] == "rice"][0]
+        chicken = next(i for i in items if i["normalized_name"] == "chicken")
+        rice = next(i for i in items if i["normalized_name"] == "rice")
         assert chicken["qty"] == 4.0  # 2 lb * (8/4) = 4 lb
         assert rice["qty"] == 2.0  # 1 cup * (8/4) = 2 cups
 
@@ -231,7 +231,7 @@ class TestShoppingList:
         meals = [(1, "Meal 1", "test_scale_down", 2)]
         plan_id = create_meal_plan(db, "Half Test", "2026-02-17", meals)
         items = get_shopping_list(db, plan_id)
-        beef = [i for i in items if i["normalized_name"] == "ground beef"][0]
+        beef = next(i for i in items if i["normalized_name"] == "ground beef")
         assert beef["qty"] == 1.0  # 2 lb * (2/4) = 1 lb
 
     def test_shopping_list_no_scaling_when_same_servings(self, db):
@@ -251,7 +251,7 @@ class TestShoppingList:
         meals = [(1, "Meal 1", "test_same_servings", 4)]
         plan_id = create_meal_plan(db, "Same Test", "2026-02-17", meals)
         items = get_shopping_list(db, plan_id)
-        chicken = [i for i in items if i["normalized_name"] == "chicken thigh"][0]
+        chicken = next(i for i in items if i["normalized_name"] == "chicken thigh")
         assert chicken["qty"] == 3.0  # unchanged
 
     def test_shopping_list_no_servings_override_no_scaling(self, db):
@@ -272,7 +272,7 @@ class TestShoppingList:
         meals = [(1, "Meal 1", "test_null_servings")]
         plan_id = create_meal_plan(db, "Null Test", "2026-02-17", meals)
         items = get_shopping_list(db, plan_id)
-        pork = [i for i in items if i["normalized_name"] == "pork"][0]
+        pork = next(i for i in items if i["normalized_name"] == "pork")
         assert pork["qty"] == 1.0  # unchanged, no scaling
 
     def test_shopping_list_scales_and_aggregates(self, db):
@@ -307,7 +307,7 @@ class TestShoppingList:
         ]
         plan_id = create_meal_plan(db, "Agg Test", "2026-02-17", meals)
         items = get_shopping_list(db, plan_id)
-        rice = [i for i in items if i["normalized_name"] == "rice"][0]
+        rice = next(i for i in items if i["normalized_name"] == "rice")
         # Recipe A: 1 cup * (4/2) = 2 cups
         # Recipe B: 2 cups * (4/2) = 4 cups
         # Total: 6 cups
@@ -319,16 +319,15 @@ class TestUserSettings:
         assert has_completed_onboarding(db) is False
 
     def test_save_and_has_completed_onboarding(self, db):
-        save_user_settings(db, "Brittney", 4, 5)
+        save_user_settings(db, 4, 5)
         assert has_completed_onboarding(db) is True
 
     def test_get_user_settings_before_save(self, db):
         assert get_user_settings(db) is None
 
     def test_save_and_get_user_settings(self, db):
-        save_user_settings(db, "Brittney", 4, 5)
+        save_user_settings(db, 4, 5)
         settings = get_user_settings(db)
         assert settings is not None
-        assert settings["name"] == "Brittney"
         assert settings["servings"] == 4
         assert settings["meals_per_week"] == 5
