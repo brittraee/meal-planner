@@ -86,7 +86,7 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("Recipe Browser")
+st.title("Recipe Library")
 st.caption(
     "Filter by protein, tags, or keyword. "
     "Click a card for details, pin favorites for your meal plan."
@@ -104,7 +104,7 @@ pinned = st.session_state.pinned_recipes
 # Check if recipes exist
 all_recipes = search_recipes(conn)
 if not all_recipes:
-    st.warning("No recipes found. Run `python scripts/ingest.py` to import your recipe cards.")
+    st.warning("No recipes found. Add recipes via the Add Recipe page.")
     st.stop()
 
 # --- Filter bar ---
@@ -170,37 +170,42 @@ with st.sidebar:
 BREAKFAST_TAGS = {"breakfastfordinner", "brinner", "breakfast"}
 
 SECTION_ICONS = {
+    "My Recipes": "\U0001f516",
     "Breakfast": "\U0001f373",
-    "Chicken": "\U0001f357",
+    "Poultry": "\U0001f357",
     "Beef": "\U0001f969",
     "Pork": "\U0001f953",
-    "Turkey": "\U0001f983",
-    "Fish": "\U0001f41f",
-    "Shrimp": "\U0001f990",
-    "Seafood": "\U0001f99e",
+    "Seafood": "\U0001f41f",
     "Vegetarian": "\U0001f96c",
     "Vegan": "\U0001f331",
     "Side": "\U0001f957",
 }
 
 SECTION_ORDER = [
-    "Breakfast", "Chicken", "Beef", "Pork", "Turkey",
-    "Fish", "Shrimp", "Seafood", "Vegetarian", "Vegan", "Side",
+    "My Recipes", "Breakfast", "Poultry", "Beef", "Pork",
+    "Seafood", "Vegetarian", "Vegan", "Side",
 ]
 
 # Accent colors per section (warm for meat, cool for seafood, green for plant)
 SECTION_COLORS = {
+    "My Recipes": "#cb9e21",
     "Breakfast": "#FFD54F",
-    "Chicken": "#E8985A",
+    "Poultry": "#E8985A",
     "Beef": "#C45B4A",
     "Pork": "#D4785C",
-    "Turkey": "#B8784E",
-    "Fish": "#4A90A4",
-    "Shrimp": "#5BA0B5",
-    "Seafood": "#3D8B99",
+    "Seafood": "#4A90A4",
     "Vegetarian": "#6ABF69",
     "Vegan": "#4CAF50",
     "Side": "#8DB580",
+}
+
+
+_PROTEIN_TO_SECTION = {
+    "chicken": "Poultry",
+    "turkey": "Poultry",
+    "fish": "Seafood",
+    "shrimp": "Seafood",
+    "seafood": "Seafood",
 }
 
 
@@ -209,12 +214,14 @@ def _get_section(recipe: dict) -> str:
     tags = set(recipe.get("tags", []))
     if tags & BREAKFAST_TAGS:
         return "Breakfast"
-    protein = recipe.get("protein", "Other") or "Other"
-    return protein.title()
+    protein = (recipe.get("protein") or "other").lower()
+    return _PROTEIN_TO_SECTION.get(protein, protein.title())
 
 
 sections: dict[str, list[dict]] = {}
 for recipe in results:
+    if recipe.get("source_type") in ("url", "manual"):
+        sections.setdefault("My Recipes", []).append(recipe)
     section = _get_section(recipe)
     sections.setdefault(section, []).append(recipe)
 

@@ -248,6 +248,7 @@ def search_recipes(
     # Subquery to collect tags per recipe (GROUP_CONCAT)
     sql = """
         SELECT r.id, r.title, r.protein, r.prep_notes, r.source_file,
+               r.source_type,
                (SELECT GROUP_CONCAT(rt2.tag, ',')
                 FROM recipe_tags rt2 WHERE rt2.recipe_id = r.id) AS tags_csv
         FROM recipes r
