@@ -4,6 +4,7 @@ from datetime import date
 
 import streamlit as st
 
+from src.constants import PROTEIN_SUBS, TAG_DISPLAY
 from src.database import (
     create_meal_plan,
     get_connection,
@@ -83,19 +84,6 @@ with _serv_col:
     )
 start_day = "Monday"  # kept for internal ordering, not shown to user
 
-_TAG_DISPLAY: dict[str, str] = {
-    "comfortfood": "Comfort Food",
-    "kidfriendly": "Kid Friendly",
-    "batchcook": "Batch Cook",
-    "onepan": "One Pan",
-    "sheetpan": "Sheet Pan",
-    "breakfast": "Breakfast",
-    "sidedish": "Side Dish",
-    "lowcarb": "Low Carb",
-    "whole30": "Whole30",
-    "bbq": "BBQ",
-}
-
 with st.expander("Customize", expanded=True):
     available_tags = [t for t in get_unique_tags(conn) if not t.rstrip("min").isdigit()]
     lifestyle_tags = [
@@ -112,7 +100,7 @@ with st.expander("Customize", expanded=True):
         "Priority tags",
         options=lifestyle_tags,
         selection_mode="multi",
-        format_func=lambda t: _TAG_DISPLAY.get(t, t.title()),
+        format_func=lambda t: TAG_DISPLAY.get(t, t.title()),
         key="priority_tag_pills",
         label_visibility="collapsed",
     ) or []
@@ -136,19 +124,12 @@ with st.expander("Customize", expanded=True):
     ) or []
 
     # Sub-category refinement for selected proteins
-    _PROTEIN_SUBS: dict[str, list[str]] = {
-        "beef": ["ground beef", "steak", "roast", "brisket"],
-        "chicken": ["breast", "thigh", "drumstick", "whole chicken"],
-        "pork": ["pork loin", "pork tenderloin", "pork shoulder"],
-        "shrimp": ["large shrimp", "jumbo shrimp"],
-        "turkey": ["ground turkey"],
-    }
     _sub_picks: list[str] = []
     for _ing in _included:
-        if _ing in _PROTEIN_SUBS:
+        if _ing in PROTEIN_SUBS:
             _subs = st.pills(
                 f"{_ing.title()} type",
-                options=_PROTEIN_SUBS[_ing],
+                options=PROTEIN_SUBS[_ing],
                 selection_mode="multi",
                 format_func=str.title,
                 key=f"sub_{_ing}",
@@ -171,9 +152,9 @@ with st.expander("Customize", expanded=True):
 # Build final include list: use sub-picks where available, keep top-level otherwise
 _final_included = []
 for _ing in (_included or []):
-    if _ing in _PROTEIN_SUBS and _sub_picks:
+    if _ing in PROTEIN_SUBS and _sub_picks:
         # Only keep sub-picks that belong to this protein
-        _my_subs = [s for s in _sub_picks if s in _PROTEIN_SUBS[_ing]]
+        _my_subs = [s for s in _sub_picks if s in PROTEIN_SUBS[_ing]]
         if _my_subs:
             _final_included.extend(_my_subs)
         else:
@@ -275,7 +256,7 @@ if "current_plan" in st.session_state:
                 "Servings",
                 min_value=1,
                 max_value=20,
-                value=_default_servings,
+                value=int(row["servings"]),
                 key=f"servings_{idx}",
                 label_visibility="collapsed",
             )

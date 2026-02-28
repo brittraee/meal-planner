@@ -2,6 +2,7 @@
 
 import streamlit as st
 
+from src.constants import PROTEIN_SUBS, TAG_DISPLAY
 from src.database import (
     get_connection,
     get_recipe_details,
@@ -208,18 +209,6 @@ time_values = {
     "60 min": 60, "90 min": 90, "120 min": 120,
 }
 
-_TAG_DISPLAY: dict[str, str] = {
-    "comfortfood": "Comfort Food",
-    "kidfriendly": "Kid Friendly",
-    "batchcook": "Batch Cook",
-    "onepan": "One Pan",
-    "sheetpan": "Sheet Pan",
-    "breakfast": "Breakfast",
-    "sidedish": "Side Dish",
-    "lowcarb": "Low Carb",
-    "whole30": "Whole30",
-    "bbq": "BBQ",
-}
 
 with st.expander("Filters", expanded=False, icon=":material/filter_list:"):
     time_col, search_col, _ = st.columns([1, 2, 2])
@@ -243,19 +232,12 @@ with st.expander("Filters", expanded=False, icon=":material/filter_list:"):
     ) or []
 
     # Sub-category refinement for selected proteins
-    _PROTEIN_SUBS: dict[str, list[str]] = {
-        "beef": ["ground beef", "steak", "roast", "brisket"],
-        "chicken": ["breast", "thigh", "drumstick", "whole chicken"],
-        "pork": ["pork loin", "pork tenderloin", "pork shoulder"],
-        "shrimp": ["large shrimp", "jumbo shrimp"],
-        "turkey": ["ground turkey"],
-    }
     _sub_picks: list[str] = []
     for _ing in selected_ingredients:
-        if _ing in _PROTEIN_SUBS:
+        if _ing in PROTEIN_SUBS:
             _subs = st.pills(
                 f"{_ing.title()} type",
-                options=_PROTEIN_SUBS[_ing],
+                options=PROTEIN_SUBS[_ing],
                 selection_mode="multi",
                 format_func=str.title,
                 key=f"recipe_sub_{_ing}",
@@ -266,8 +248,8 @@ with st.expander("Filters", expanded=False, icon=":material/filter_list:"):
     # Build final ingredient list: use sub-picks where available
     _final_ingredients: list[str] = []
     for _ing in selected_ingredients:
-        if _ing in _PROTEIN_SUBS and _sub_picks:
-            _my_subs = [s for s in _sub_picks if s in _PROTEIN_SUBS[_ing]]
+        if _ing in PROTEIN_SUBS and _sub_picks:
+            _my_subs = [s for s in _sub_picks if s in PROTEIN_SUBS[_ing]]
             if _my_subs:
                 _final_ingredients.extend(_my_subs)
             else:
@@ -281,7 +263,7 @@ with st.expander("Filters", expanded=False, icon=":material/filter_list:"):
         "Filter by tag",
         options=available_tags,
         selection_mode="multi",
-        format_func=lambda t: _TAG_DISPLAY.get(t, t.title()),
+        format_func=lambda t: TAG_DISPLAY.get(t, t.title()),
         key="recipe_tag_pills",
         label_visibility="collapsed",
     ) or []
@@ -382,6 +364,7 @@ sections: dict[str, list[dict]] = {}
 for recipe in results:
     if recipe.get("source_type") in ("url", "manual"):
         sections.setdefault("My Recipes", []).append(recipe)
+        continue
     section = _get_section(recipe)
     sections.setdefault(section, []).append(recipe)
 
@@ -394,7 +377,7 @@ active = []
 if selected_ingredients:
     active.append(f"Ingredients: {', '.join(i.title() for i in selected_ingredients)}")
 if selected_tags:
-    active.append(f"Tags: {', '.join(_TAG_DISPLAY.get(t, t.title()) for t in selected_tags)}")
+    active.append(f"Tags: {', '.join(TAG_DISPLAY.get(t, t.title()) for t in selected_tags)}")
 if selected_time != "Any":
     active.append(f"Max: {selected_time}")
 if search_text:

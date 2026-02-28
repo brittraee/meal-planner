@@ -52,7 +52,9 @@ class Ingredient:
 
     @property
     def normalized(self) -> str:
-        return self.name.lower().strip()
+        from src.ingredients import normalize
+
+        return normalize(self.name)
 
     @property
     def all_names(self) -> tuple[str, ...]:

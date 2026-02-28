@@ -21,27 +21,27 @@ settings = get_user_settings(conn)
 current_servings = settings["servings"] if settings else 4
 current_meals = settings["meals_per_week"] if settings else 5
 
-_serv_col, _meal_col = st.columns(2)
-with _serv_col:
-    servings = st.number_input(
-        "Default servings per meal",
-        min_value=1,
-        max_value=10,
-        value=current_servings,
-        help="Includes adults + kids. You can adjust per-meal later.",
-    )
-with _meal_col:
-    meals_per_week = st.number_input(
-        "Dinners to plan per week",
-        min_value=1,
-        max_value=7,
-        value=current_meals,
-        help="Most households do 4-6, leaving room for leftovers or takeout.",
-    )
-
-if servings != current_servings or meals_per_week != current_meals:
-    save_user_settings(conn, servings, meals_per_week)
-    st.toast("Preferences saved.")
+with st.form("preferences_form"):
+    _serv_col, _meal_col = st.columns(2)
+    with _serv_col:
+        servings = st.number_input(
+            "Default servings per meal",
+            min_value=1,
+            max_value=10,
+            value=current_servings,
+            help="Includes adults + kids. You can adjust per-meal later.",
+        )
+    with _meal_col:
+        meals_per_week = st.number_input(
+            "Dinners to plan per week",
+            min_value=1,
+            max_value=7,
+            value=current_meals,
+            help="Most households do 4-6, leaving room for leftovers or takeout.",
+        )
+    if st.form_submit_button("Save", icon=":material/save:"):
+        save_user_settings(conn, servings, meals_per_week)
+        st.toast("Preferences saved.")
 
 # --- Pantry summary ---
 st.divider()
@@ -112,5 +112,30 @@ if st.button(
     type="tertiary",
     help="Reset everything and go through the setup page again.",
 ):
-    clear_user_data(conn)
-    st.switch_page("pages/0_setup.py")
+    st.session_state.confirm_rerun = True
+
+if st.session_state.get("confirm_rerun"):
+
+    @st.dialog("Re-run setup?")
+    def _confirm_rerun():
+        st.warning(
+            "This clears your settings, pantry items, and meal plans, "
+            "then starts the setup wizard. Your recipe library stays intact."
+        )
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("Cancel", use_container_width=True, key="cancel_rerun"):
+                st.session_state.confirm_rerun = False
+                st.rerun()
+        with col2:
+            if st.button(
+                "Re-run Setup",
+                type="primary",
+                use_container_width=True,
+                key="confirm_rerun_btn",
+            ):
+                clear_user_data(conn)
+                st.session_state.confirm_rerun = False
+                st.switch_page("pages/0_setup.py")
+
+    _confirm_rerun()

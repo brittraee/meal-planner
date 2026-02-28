@@ -128,8 +128,12 @@ have_items = [i for i in items if i["in_pantry"]]
 
 st.subheader(f"Need to Buy ({len(need_items)} items)")
 if need_items:
-    if "checked_items" not in st.session_state:
+    if (
+        "checked_items" not in st.session_state
+        or st.session_state.get("checked_plan_id") != plan_id
+    ):
         st.session_state["checked_items"] = set()
+        st.session_state["checked_plan_id"] = plan_id
 
     _item_idx = 0
     sections = group_by_section(need_items)
