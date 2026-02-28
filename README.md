@@ -1,10 +1,8 @@
 # Meal Planner
 
-Weekly meal planning app. Pick recipes, generate a plan, get a shopping list grouped by store section. Tracks your pantry so you're not buying stuff you already have.
+Weekly meal planning app built with Streamlit, SQLite, and Pandas. Generates dinner plans scored against pantry, builds grouped shopping lists, and handles recipe import from URLs with full ingredient normalization.
 
-Built with Streamlit, SQLite, and Pandas.
-
-**[Live Demo](https://meal-planner.streamlit.app)** *(update URL after deploy)*
+**[Live Demo](https://meal-planner-bre2026.streamlit.app)**
 
 ## Features
 
@@ -16,43 +14,35 @@ Built with Streamlit, SQLite, and Pandas.
 
 **Add Recipe** — Paste a URL and the scraper pulls in title, ingredients, and image. Or add one by hand.
 
-## Ingredient parsing
+## Ingredient normalization
 
-The hardest part of this project. Recipe websites format ingredients in every way imaginable — unicode fractions, brand names baked in, metric/imperial mixing, prep instructions stuffed into the ingredient name.
+Recipe sites format ingredients inconsistently — unicode fractions, embedded brand names, metric/imperial mixing, prep instructions stuffed into the name. The normalization scripts (`src/scraper.py`, `src/ingredients.py`) handle parsing and are included so the pipeline stays consistent as recipes are added.
 
-The parser runs each line through:
+`ingredients.py` maintains a section map (~200 ingredients → store sections) and an alias table for common variants.
 
-```text
-raw text → unicode fractions → pricing removal → dual unit detection →
-qty/unit/name split → brand stripping → descriptor removal → prep cleanup →
-alias normalization → metric→imperial → DB
-```
+## How plan generation works
 
-Some specifics:
-- Strips 20+ grocery brand prefixes (Aldi store brands, Kraft, Barilla, etc.)
-- Maps ~200 ingredients to store sections for shopping list grouping
-- Normalizes variants ("extra virgin olive oil" → "olive oil", "kosher salt and ground black pepper" → "salt")
-- Warns on import when an ingredient doesn't match anything known
+Recipes are scored based on what you have and what you like, then selected using weighted randomness so plans vary each time:
 
-## How the planner scores recipes
+- +3 if you already have ingredients in your pantry
+- +3 if the recipe matches an ingredient you requested
+- +1 for quick/easy, +1 for kid-friendly
+- +2 for your priority tags
 
-1. +3 if the recipe uses ingredients already in your pantry
-2. +3 if the recipe contains an ingredient you asked for
-3. +1 for quick/easy, +1 for kid-friendly
-4. +2 for your priority tags (set in preferences)
-5. Weighted random selection — higher scores are more likely, but not guaranteed
-6. Greedy fill with protein-variety constraint
+Higher-scoring recipes are more likely to appear, but not guaranteed. The planner also avoids repeating the same protein on consecutive nights.
 
 ## Tech
 
-Streamlit, SQLite (7 tables), Pandas, recipe-scrapers, pytest (146 tests), Ruff
+**Stack:** Streamlit, SQLite (7 tables), Pandas, recipe-scrapers, TheMealDB API, Material Icons, custom CSS
+
+**Dev tools:** pytest (146 tests), Ruff, Claude Code (Opus/Sonnet 4.6)
 
 ## Project structure
 
 ```text
 app.py                  # Entry point, nav, onboarding
 pages/
-  0_setup.py            # First-run defaults + pantry
+  0_setup.py            # First-run setup + pantry
   1_recipes.py          # Recipe library
   2_planner.py          # Plan generator
   3_shopping.py         # Shopping list
@@ -73,12 +63,20 @@ data/meals.db           # SQLite database
 
 ## Run locally
 
+Only four dependencies: `streamlit`, `pandas`, `requests`, `recipe-scrapers`.
+
 ```bash
 git clone https://github.com/brittraee/meal-planner.git && cd meal-planner
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 streamlit run app.py
 ```
+
+## Built by
+
+[Brittney Erler-Rajek](https://github.com/brittraee)
+
+AI-Disclosure: Self taught developer utilizing Claude Code (Opus 4.6) for boilerplate code gen, documentation lookup, brainstorming and learning.
 
 ## License
 
