@@ -162,7 +162,7 @@ _TAG_DISPLAY: dict[str, str] = {
     "bbq": "BBQ",
 }
 
-time_col, search_col = st.columns([1, 3])
+time_col, search_col, _ = st.columns([1, 2, 2])
 with time_col:
     selected_time = st.selectbox("Max Time", time_options)
 with search_col:
