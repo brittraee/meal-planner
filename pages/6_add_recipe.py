@@ -101,7 +101,6 @@ with tab_url:
             slug = re.sub(r"[^a-z0-9]+", "_", data["title"].lower()).strip("_")
             data["id"] = f"url_{slug}"
             insert_recipe_dict(conn, data)
-            conn.commit()
             st.success(f"Saved **{data['title']}**!")
             del st.session_state["scraped_recipe"]
             st.rerun()
@@ -209,7 +208,6 @@ with tab_manual:
             "tags": tags,
         }
         insert_recipe_dict(conn, recipe_data)
-        conn.commit()
         st.success(f"Saved **{title}**!")
         # Reset form
         st.session_state["manual_ingredient_count"] = 3

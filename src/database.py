@@ -126,42 +126,43 @@ def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
     replacement when the recipe already has scraped qty data (prevents
     markdown re-import from wiping backfilled quantities).
     """
-    has_qty = conn.execute(
-        "SELECT 1 FROM recipe_ingredients WHERE recipe_id = ? AND qty IS NOT NULL LIMIT 1",
-        (recipe.filename,),
-    ).fetchone()
+    with conn:
+        has_qty = conn.execute(
+            "SELECT 1 FROM recipe_ingredients WHERE recipe_id = ? AND qty IS NOT NULL LIMIT 1",
+            (recipe.filename,),
+        ).fetchone()
 
-    conn.execute(
-        """INSERT OR REPLACE INTO recipes (id, title, prep_notes, source_file, protein)
-           VALUES (?, ?, ?, ?, ?)""",
-        (
-            recipe.filename,
-            recipe.title,
-            recipe.prep,
-            recipe.filename,
-            recipe.protein.value,
-        ),
-    )
-
-    if not has_qty:
         conn.execute(
-            "DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe.filename,)
+            """INSERT OR REPLACE INTO recipes (id, title, prep_notes, source_file, protein)
+               VALUES (?, ?, ?, ?, ?)""",
+            (
+                recipe.filename,
+                recipe.title,
+                recipe.prep,
+                recipe.filename,
+                recipe.protein.value,
+            ),
         )
-        for ing in recipe.ingredients:
+
+        if not has_qty:
             conn.execute(
-                """INSERT INTO recipe_ingredients
-                   (recipe_id, raw_text, normalized_name, is_optional)
-                   VALUES (?, ?, ?, ?)""",
-                (recipe.filename, ing.name, ing.normalized, 1 if ing.optional else 0),
+                "DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe.filename,)
             )
+            for ing in recipe.ingredients:
+                conn.execute(
+                    """INSERT INTO recipe_ingredients
+                       (recipe_id, raw_text, normalized_name, is_optional)
+                       VALUES (?, ?, ?, ?)""",
+                    (recipe.filename, ing.name, ing.normalized, 1 if ing.optional else 0),
+                )
 
-    # Tags always refresh (low risk, no qty data)
-    conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (recipe.filename,))
-    for tag in recipe.tags:
-        conn.execute(
-            "INSERT OR IGNORE INTO recipe_tags (recipe_id, tag) VALUES (?, ?)",
-            (recipe.filename, tag),
-        )
+        # Tags always refresh (low risk, no qty data)
+        conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (recipe.filename,))
+        for tag in recipe.tags:
+            conn.execute(
+                "INSERT OR IGNORE INTO recipe_tags (recipe_id, tag) VALUES (?, ?)",
+                (recipe.filename, tag),
+            )
 
 
 def insert_recipe_dict(conn: sqlite3.Connection, data: dict[str, Any]) -> None:
@@ -171,47 +172,48 @@ def insert_recipe_dict(conn: sqlite3.Connection, data: dict[str, Any]) -> None:
     source_type, instructions, image_url, ingredients (list of dicts with
     raw_text, normalized_name, is_optional, qty, unit), tags (list of str).
     """
-    conn.execute(
-        """INSERT OR REPLACE INTO recipes
-           (id, title, prep_notes, source_file, protein, servings,
-            source_url, source_type, instructions, image_url)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (
-            data["id"],
-            data["title"],
-            data.get("prep_notes", ""),
-            data.get("source_file", data["id"]),
-            data.get("protein", "unknown"),
-            data.get("servings", 4),
-            data.get("source_url"),
-            data.get("source_type", "manual"),
-            data.get("instructions"),
-            data.get("image_url"),
-        ),
-    )
-    conn.execute("DELETE FROM recipe_ingredients WHERE recipe_id = ?", (data["id"],))
-    conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (data["id"],))
-
-    for ing in data.get("ingredients", []):
+    with conn:
         conn.execute(
-            """INSERT INTO recipe_ingredients
-               (recipe_id, raw_text, normalized_name, is_optional, qty, unit)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+            """INSERT OR REPLACE INTO recipes
+               (id, title, prep_notes, source_file, protein, servings,
+                source_url, source_type, instructions, image_url)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 data["id"],
-                ing.get("raw_text", ing.get("name", "")),
-                ing.get("normalized_name", ing.get("name", "").lower().strip()),
-                1 if ing.get("is_optional") else 0,
-                ing.get("qty"),
-                ing.get("unit"),
+                data["title"],
+                data.get("prep_notes", ""),
+                data.get("source_file", data["id"]),
+                data.get("protein", "unknown"),
+                data.get("servings", 4),
+                data.get("source_url"),
+                data.get("source_type", "manual"),
+                data.get("instructions"),
+                data.get("image_url"),
             ),
         )
+        conn.execute("DELETE FROM recipe_ingredients WHERE recipe_id = ?", (data["id"],))
+        conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (data["id"],))
 
-    for tag in data.get("tags", []):
-        conn.execute(
-            "INSERT OR IGNORE INTO recipe_tags (recipe_id, tag) VALUES (?, ?)",
-            (data["id"], tag),
-        )
+        for ing in data.get("ingredients", []):
+            conn.execute(
+                """INSERT INTO recipe_ingredients
+                   (recipe_id, raw_text, normalized_name, is_optional, qty, unit)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (
+                    data["id"],
+                    ing.get("raw_text", ing.get("name", "")),
+                    ing.get("normalized_name", ing.get("name", "").lower().strip()),
+                    1 if ing.get("is_optional") else 0,
+                    ing.get("qty"),
+                    ing.get("unit"),
+                ),
+            )
+
+        for tag in data.get("tags", []):
+            conn.execute(
+                "INSERT OR IGNORE INTO recipe_tags (recipe_id, tag) VALUES (?, ?)",
+                (data["id"], tag),
+            )
 
 
 def get_all_recipes(conn: sqlite3.Connection) -> list[dict[str, Any]]:
