@@ -102,10 +102,15 @@ if "setup_pantry_initialized" not in st.session_state:
     st.session_state.setup_pantry_initialized = True
 
 # Show all items as pills with defaults pre-selected
-tabs = st.tabs(list(sections.keys()))
+# Order: Pantry first (most common staples), then the rest
+_SECTION_ORDER = ["Pantry", "Produce", "Dairy", "Protein", "Frozen"]
+ordered = [(s, sections[s]) for s in _SECTION_ORDER if s in sections]
+ordered.extend((s, sections[s]) for s in sections if s not in _SECTION_ORDER)
+
+tabs = st.tabs([s for s, _ in ordered])
 total_selected = 0
 
-for tab, (section, section_items) in zip(tabs, sections.items(), strict=False):
+for tab, (section, section_items) in zip(tabs, ordered, strict=False):
     with tab:
         chosen = st.pills(
             f"Select {section.lower()} items",

@@ -121,7 +121,7 @@ st.markdown(
 
 st.title("Recipe Library")
 st.caption(
-    "Filter by protein, ingredient, tags, or keyword. "
+    "Filter by ingredient, tags, or keyword. "
     "Click a card for details, pin favorites for your meal plan."
 )
 
@@ -149,26 +149,47 @@ time_values = {
     "60 min": 60, "90 min": 90, "120 min": 120,
 }
 
-protein_col, time_col, tags_col, spacer, search_col = st.columns([1.5, 1.5, 2.5, 0.5, 2])
-with protein_col:
-    selected_protein = st.selectbox("Protein", ["All", *proteins])
+_TAG_DISPLAY: dict[str, str] = {
+    "comfortfood": "Comfort Food",
+    "kidfriendly": "Kid Friendly",
+    "batchcook": "Batch Cook",
+    "onepan": "One Pan",
+    "sheetpan": "Sheet Pan",
+    "breakfastfordinner": "Breakfast for Dinner",
+    "sidedish": "Side Dish",
+    "lowcarb": "Low Carb",
+    "whole30": "Whole30",
+    "bbq": "BBQ",
+}
+
+time_col, search_col = st.columns([1, 3])
 with time_col:
     selected_time = st.selectbox("Max Time", time_options)
-with tags_col:
-    selected_tags = st.multiselect("Tags", available_tags)
 with search_col:
     search_text = st.text_input("Search", placeholder="e.g. pasta, taco...")
 
-# Ingredient filter pills
+# Ingredient pills
 _staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
              "cheese", "tortilla", "noodles", "tofu"]
 _ing_options = proteins + [s for s in _staples if s not in proteins]
+st.markdown("**Ingredients**")
 selected_ingredients = st.pills(
     "Filter by ingredient",
     options=_ing_options,
     selection_mode="multi",
     format_func=str.title,
     key="recipe_ingredient_pills",
+    label_visibility="collapsed",
+) or []
+
+# Tag pills
+st.markdown("**Tags**")
+selected_tags = st.pills(
+    "Filter by tag",
+    options=available_tags,
+    selection_mode="multi",
+    format_func=lambda t: _TAG_DISPLAY.get(t, t.title()),
+    key="recipe_tag_pills",
     label_visibility="collapsed",
 ) or []
 
@@ -179,7 +200,6 @@ results = search_recipes(
     conn,
     query=search_text or None,
     tags=selected_tags or None,
-    protein=selected_protein if selected_protein != "All" else None,
     max_time=max_time,
     ingredients=selected_ingredients or None,
 )
@@ -278,14 +298,12 @@ ordered_sections.extend(sorted(s for s in sections if s not in SECTION_ORDER))
 
 # --- Active filters + recipe count ---
 active = []
-if selected_protein != "All":
-    active.append(f"Protein: {selected_protein}")
-if selected_tags:
-    active.append(f"Tags: {', '.join(selected_tags)}")
-if selected_time != "Any":
-    active.append(f"Max: {selected_time}")
 if selected_ingredients:
     active.append(f"Ingredients: {', '.join(i.title() for i in selected_ingredients)}")
+if selected_tags:
+    active.append(f"Tags: {', '.join(_TAG_DISPLAY.get(t, t.title()) for t in selected_tags)}")
+if selected_time != "Any":
+    active.append(f"Max: {selected_time}")
 if search_text:
     active.append(f'"{search_text}"')
 if active:

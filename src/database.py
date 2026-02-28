@@ -285,15 +285,20 @@ def search_recipes(
         params.extend(time_tags)
 
     if ingredients:
-        # Match recipes that use ANY of the selected ingredients
-        placeholders = ", ".join("?" for _ in ingredients)
+        # Match recipes by protein column OR ingredient name (LIKE for partial)
+        protein_ph = ", ".join("?" for _ in ingredients)
+        like_clauses = " OR ".join("ri2.normalized_name LIKE ?" for _ in ingredients)
         sql += f"""
-            AND r.id IN (
-                SELECT ri2.recipe_id FROM recipe_ingredients ri2
-                WHERE ri2.normalized_name IN ({placeholders})
+            AND (
+                r.protein IN ({protein_ph})
+                OR r.id IN (
+                    SELECT ri2.recipe_id FROM recipe_ingredients ri2
+                    WHERE {like_clauses}
+                )
             )
         """
         params.extend(ingredients)
+        params.extend(f"%{ing}%" for ing in ingredients)
 
     sql += " GROUP BY r.id ORDER BY r.title"
 
