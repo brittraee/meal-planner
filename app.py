@@ -85,8 +85,13 @@ if not onboarded:
             icon=":material/rocket_launch:", default=True,
         ),
     ]
-nav["Plan"] = plan_pages
-nav["Manage"] = manage_pages
+    nav["Plan"] = plan_pages
+    nav["Manage"] = manage_pages
+else:
+    nav["Plan"] = plan_pages
+    nav["Manage"] = manage_pages + [
+        st.Page("pages/0_setup.py", title="Re-run Setup", icon=":material/rocket_launch:"),
+    ]
 
 pg = st.navigation(nav)
 

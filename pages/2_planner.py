@@ -57,8 +57,7 @@ with st.sidebar:
     st.divider()
     st.markdown("### Quick Start")
     st.caption(
-        "Generate → swap any meal → adjust servings → save. "
-        "Pin recipes from the library to lock them in."
+        "Generate → swap any meal → adjust servings → save."
     )
     st.page_link(
         "pages/1_recipes.py",
@@ -76,10 +75,21 @@ _default_servings = _settings["servings"] if _settings else 4
 num_days = st.slider("Meals to plan", min_value=3, max_value=7, value=_default_days)
 start_day = "Monday"  # kept for internal ordering, not shown to user
 
-with st.expander("Customize"):
-    # Tag priorities as checkboxes
+_TAG_DISPLAY: dict[str, str] = {
+    "comfortfood": "Comfort Food",
+    "kidfriendly": "Kid Friendly",
+    "batchcook": "Batch Cook",
+    "onepan": "One Pan",
+    "sheetpan": "Sheet Pan",
+    "breakfastfordinner": "Breakfast for Dinner",
+    "sidedish": "Side Dish",
+    "lowcarb": "Low Carb",
+    "whole30": "Whole30",
+    "bbq": "BBQ",
+}
+
+with st.expander("Customize", expanded=True):
     available_tags = [t for t in get_unique_tags(conn) if not t.rstrip("min").isdigit()]
-    # Group into lifestyle vs cuisine
     lifestyle_tags = [
         t for t in available_tags if t in {
             "quick", "comfortfood", "kidfriendly", "batchcook", "onepan",
@@ -94,15 +104,12 @@ with st.expander("Customize"):
         "Priority tags",
         options=lifestyle_tags,
         selection_mode="multi",
+        format_func=lambda t: _TAG_DISPLAY.get(t, t.title()),
         key="priority_tag_pills",
         label_visibility="collapsed",
     ) or []
 
     st.divider()
-    st.markdown(
-        "**Include / exclude ingredients** — "
-        "tap once to include, twice to exclude, again to clear"
-    )
 
     # Build ingredient list from proteins + common staples
     _proteins = get_unique_proteins(conn)
@@ -110,38 +117,31 @@ with st.expander("Customize"):
                  "cheese", "tortilla", "noodles", "tofu"]
     _selector_items = _proteins + [s for s in _staples if s not in _proteins]
 
-    # Tri-state: None → "include" → "exclude" → None
-    if "ing_states" not in st.session_state:
-        st.session_state.ing_states = {}
+    st.markdown(":green[**Include**] — recipes must use these")
+    _included = st.pills(
+        "Include ingredients",
+        options=_selector_items,
+        selection_mode="multi",
+        format_func=str.title,
+        key="include_pills",
+        label_visibility="collapsed",
+    ) or []
 
-    _cols = st.columns(5)
-    for _i, _ing in enumerate(_selector_items):
-        _state = st.session_state.ing_states.get(_ing)
-        if _state == "include":
-            _label = f"+ {_ing}"
-            _type = "primary"
-        elif _state == "exclude":
-            _label = f"× {_ing}"
-            _type = "secondary"
-        else:
-            _label = _ing
-            _type = "tertiary"
-
-        with _cols[_i % 5]:
-            if st.button(_label, key=f"ing_{_ing}", type=_type, use_container_width=True):
-                if _state is None:
-                    st.session_state.ing_states[_ing] = "include"
-                elif _state == "include":
-                    st.session_state.ing_states[_ing] = "exclude"
-                else:
-                    del st.session_state.ing_states[_ing]
-                st.rerun()
+    _exclude_options = [i for i in _selector_items if i not in _included]
+    st.markdown(":red[**Exclude**] — skip recipes with these")
+    _excluded = st.pills(
+        "Exclude ingredients",
+        options=_exclude_options,
+        selection_mode="multi",
+        format_func=str.title,
+        key="exclude_pills",
+        label_visibility="collapsed",
+    ) or []
 
     seed = 0
 
-_ing_states = st.session_state.get("ing_states", {})
-included_list = [k for k, v in _ing_states.items() if v == "include"] or None
-excluded_list = [k for k, v in _ing_states.items() if v == "exclude"] or None
+included_list = _included or None
+excluded_list = _excluded or None
 require_included = bool(included_list)
 
 # --- Pinned recipes section ---
@@ -166,10 +166,7 @@ if pinned:
                 "Some may be dropped."
             )
 else:
-    st.caption(
-        "No pinned recipes — the planner will pick for you. "
-        "Or pin specific recipes from the Recipe Library."
-    )
+    st.caption("No pinned recipes — the planner will pick for you.")
 
 # --- Generate plan ---
 if st.button("Generate Plan", type="secondary", use_container_width=True):
