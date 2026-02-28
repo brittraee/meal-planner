@@ -63,7 +63,6 @@ def _pantry_editor():
             with col_del:
                 if st.button("\u00d7", key=f"pdel_{item['id']}"):
                     delete_pantry_item(conn, item["id"])
-                    st.rerun()
 
     # Quick add from common ingredients
     st.divider()
@@ -81,7 +80,6 @@ def _pantry_editor():
             if chosen:
                 for name in chosen:
                     add_pantry_item(conn, name, normalize(name), get_section(name))
-                st.rerun()
 
 # --- Quick pantry edit button ---
 if st.button("Edit Pantry", icon=":material/edit:", type="tertiary"):
