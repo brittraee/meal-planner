@@ -50,19 +50,6 @@ st.markdown(
         color: #9B8F82;  /* Preferences — warm gray */
     }
 
-    /* Auto-collapse sidebar on mobile */
-    @media (max-width: 768px) {
-        [data-testid="stSidebar"] {
-            min-width: 0 !important;
-            width: 0 !important;
-            transform: translateX(-100%);
-        }
-        [data-testid="stSidebar"][aria-expanded="true"] {
-            min-width: 245px !important;
-            width: 245px !important;
-            transform: translateX(0);
-        }
-    }
     </style>""",
     unsafe_allow_html=True,
 )
