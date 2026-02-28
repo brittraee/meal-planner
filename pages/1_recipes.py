@@ -115,6 +115,24 @@ st.markdown(
         height: 1.25em;
         opacity: 0.9;
     }
+
+    /* ---- Mobile-friendly adjustments ---- */
+    @media (max-width: 768px) {
+        /* Smaller page title */
+        [data-testid="stTitle"] { font-size: 1.4rem; }
+
+        /* Tighter section expander spacing */
+        [data-testid="stExpander"] { margin-bottom: 0.25rem; }
+
+        /* Compact filter pills */
+        button[data-testid="stPillButton"] {
+            font-size: 0.78rem;
+            padding: 0.15rem 0.5rem;
+        }
+
+        /* Reduce top page padding */
+        .stMainBlockContainer { padding-top: 1rem; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -168,69 +186,70 @@ _TAG_DISPLAY: dict[str, str] = {
     "bbq": "BBQ",
 }
 
-time_col, search_col, _ = st.columns([1, 2, 2])
-with time_col:
-    selected_time = st.selectbox("Max Time", time_options)
-with search_col:
-    search_text = st.text_input("Search", placeholder="e.g. pasta, taco...")
+with st.expander("Filters", expanded=False, icon=":material/filter_list:"):
+    time_col, search_col, _ = st.columns([1, 2, 2])
+    with time_col:
+        selected_time = st.selectbox("Max Time", time_options)
+    with search_col:
+        search_text = st.text_input("Search", placeholder="e.g. pasta, taco...")
 
-# Ingredient pills
-_staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
-             "cheese", "tortilla", "noodles"]
-_ing_options = proteins + [s for s in _staples if s not in proteins]
-st.markdown("**Ingredients** — show recipes with any of these")
-selected_ingredients = st.pills(
-    "Filter by ingredient",
-    options=_ing_options,
-    selection_mode="multi",
-    format_func=str.title,
-    key="recipe_ingredient_pills",
-    label_visibility="collapsed",
-) or []
+    # Ingredient pills
+    _staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
+                 "cheese", "tortilla", "noodles"]
+    _ing_options = proteins + [s for s in _staples if s not in proteins]
+    st.markdown("**Ingredients** — show recipes with any of these")
+    selected_ingredients = st.pills(
+        "Filter by ingredient",
+        options=_ing_options,
+        selection_mode="multi",
+        format_func=str.title,
+        key="recipe_ingredient_pills",
+        label_visibility="collapsed",
+    ) or []
 
-# Sub-category refinement for selected proteins
-_PROTEIN_SUBS: dict[str, list[str]] = {
-    "beef": ["ground beef", "steak", "roast", "brisket"],
-    "chicken": ["breast", "thigh", "drumstick", "whole chicken"],
-    "pork": ["pork loin", "pork tenderloin", "pork shoulder"],
-    "shrimp": ["large shrimp", "jumbo shrimp"],
-    "turkey": ["ground turkey"],
-}
-_sub_picks: list[str] = []
-for _ing in selected_ingredients:
-    if _ing in _PROTEIN_SUBS:
-        _subs = st.pills(
-            f"{_ing.title()} type",
-            options=_PROTEIN_SUBS[_ing],
-            selection_mode="multi",
-            format_func=str.title,
-            key=f"recipe_sub_{_ing}",
-            label_visibility="collapsed",
-        ) or []
-        _sub_picks.extend(_subs)
+    # Sub-category refinement for selected proteins
+    _PROTEIN_SUBS: dict[str, list[str]] = {
+        "beef": ["ground beef", "steak", "roast", "brisket"],
+        "chicken": ["breast", "thigh", "drumstick", "whole chicken"],
+        "pork": ["pork loin", "pork tenderloin", "pork shoulder"],
+        "shrimp": ["large shrimp", "jumbo shrimp"],
+        "turkey": ["ground turkey"],
+    }
+    _sub_picks: list[str] = []
+    for _ing in selected_ingredients:
+        if _ing in _PROTEIN_SUBS:
+            _subs = st.pills(
+                f"{_ing.title()} type",
+                options=_PROTEIN_SUBS[_ing],
+                selection_mode="multi",
+                format_func=str.title,
+                key=f"recipe_sub_{_ing}",
+                label_visibility="collapsed",
+            ) or []
+            _sub_picks.extend(_subs)
 
-# Build final ingredient list: use sub-picks where available
-_final_ingredients: list[str] = []
-for _ing in selected_ingredients:
-    if _ing in _PROTEIN_SUBS and _sub_picks:
-        _my_subs = [s for s in _sub_picks if s in _PROTEIN_SUBS[_ing]]
-        if _my_subs:
-            _final_ingredients.extend(_my_subs)
+    # Build final ingredient list: use sub-picks where available
+    _final_ingredients: list[str] = []
+    for _ing in selected_ingredients:
+        if _ing in _PROTEIN_SUBS and _sub_picks:
+            _my_subs = [s for s in _sub_picks if s in _PROTEIN_SUBS[_ing]]
+            if _my_subs:
+                _final_ingredients.extend(_my_subs)
+            else:
+                _final_ingredients.append(_ing)
         else:
             _final_ingredients.append(_ing)
-    else:
-        _final_ingredients.append(_ing)
 
-# Tag pills
-st.markdown("**Tags**")
-selected_tags = st.pills(
-    "Filter by tag",
-    options=available_tags,
-    selection_mode="multi",
-    format_func=lambda t: _TAG_DISPLAY.get(t, t.title()),
-    key="recipe_tag_pills",
-    label_visibility="collapsed",
-) or []
+    # Tag pills
+    st.markdown("**Tags**")
+    selected_tags = st.pills(
+        "Filter by tag",
+        options=available_tags,
+        selection_mode="multi",
+        format_func=lambda t: _TAG_DISPLAY.get(t, t.title()),
+        key="recipe_tag_pills",
+        label_visibility="collapsed",
+    ) or []
 
 max_time = time_values[selected_time]
 
