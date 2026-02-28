@@ -116,6 +116,21 @@ st.markdown(
         opacity: 0.9;
     }
 
+    /* ---- Recipe card carousel (desktop: wrapping grid) ---- */
+    [data-testid="stHorizontalBlock"]:has(
+        > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+    ) {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    [data-testid="stHorizontalBlock"]:has(
+        > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+    ) > [data-testid="stColumn"] {
+        min-width: 280px;
+        flex: 1 1 calc(33.33% - 0.5rem);
+        max-width: calc(33.33% - 0.34rem);
+    }
+
     /* ---- Mobile-friendly adjustments ---- */
     @media (max-width: 768px) {
         /* Smaller page title */
@@ -132,6 +147,39 @@ st.markdown(
 
         /* Reduce top page padding */
         .stMainBlockContainer { padding-top: 1rem; }
+
+        /* Recipe card carousel: horizontal scroll */
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        ) {
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(194, 105, 79, 0.3) transparent;
+        }
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        ) > [data-testid="stColumn"] {
+            min-width: 75vw !important;
+            max-width: 75vw !important;
+            flex: 0 0 75vw !important;
+            scroll-snap-align: start;
+        }
+        /* Webkit scrollbar styling */
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        )::-webkit-scrollbar {
+            height: 4px;
+        }
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        )::-webkit-scrollbar-thumb {
+            background: rgba(194, 105, 79, 0.3);
+            border-radius: 2px;
+        }
     }
     </style>
     """,
@@ -369,8 +417,6 @@ if active:
 st.caption(f"{len(results)} recipes")
 
 # --- Render sections ---
-COLS_PER_ROW = 3
-
 if results:
     for section_name in ordered_sections:
         section_recipes = sections[section_name]
@@ -384,98 +430,95 @@ if results:
         with st.expander(
             f"{icon} {section_name} ({len(section_recipes)})", expanded=False
         ):
-            for row_start in range(0, len(section_recipes), COLS_PER_ROW):
-                row_recipes = section_recipes[row_start : row_start + COLS_PER_ROW]
-                cols = st.columns(COLS_PER_ROW)
+            # Single row of all cards — CSS handles wrapping (desktop) or carousel (mobile)
+            cols = st.columns(len(section_recipes))
+            for col, recipe in zip(cols, section_recipes, strict=False):
+                is_pinned = recipe["id"] in pinned
+                recipe_id = recipe["id"]
 
-                for col, recipe in zip(cols, row_recipes, strict=False):
-                    is_pinned = recipe["id"] in pinned
-                    recipe_id = recipe["id"]
-
-                    with col, st.container(border=True):
-                        # Top row: arrow + title + pin icon
-                        is_viewing = st.session_state.get("viewing_recipe") == recipe_id
-                        arrow = "\u25BC" if is_viewing else "\u25B6"
-                        arrow_col, title_col, pin_col = st.columns(
-                            [0.5, 5, 0.5]
+                with col, st.container(border=True):
+                    # Top row: arrow + title + pin icon
+                    is_viewing = st.session_state.get("viewing_recipe") == recipe_id
+                    arrow_col, title_col, pin_col = st.columns(
+                        [0.5, 5, 0.5]
+                    )
+                    with arrow_col:
+                        arrow_icon = (
+                            ":material/expand_more:"
+                            if is_viewing
+                            else ":material/chevron_right:"
                         )
-                        with arrow_col:
-                            arrow_icon = (
-                                ":material/expand_more:"
-                                if is_viewing
-                                else ":material/chevron_right:"
-                            )
-                            if st.button(
-                                "",
-                                key=f"arrow_{recipe_id}",
-                                icon=arrow_icon,
-                                type="secondary",
-                            ):
-                                if is_viewing:
-                                    del st.session_state["viewing_recipe"]
-                                else:
-                                    st.session_state.viewing_recipe = recipe_id
-                                st.rerun()
-                        with title_col:
-                            if st.button(
-                                recipe["title"],
-                                key=f"view_{recipe_id}",
-                                use_container_width=True,
-                                type="tertiary",
-                            ):
-                                if is_viewing:
-                                    del st.session_state["viewing_recipe"]
-                                else:
-                                    st.session_state.viewing_recipe = recipe_id
-                                st.rerun()
-                        with pin_col:
-                            btn_type = "primary" if is_pinned else "tertiary"
-                            pin_icon = ":material/push_pin:" if is_pinned else ":material/keep:"
-                            if st.button(
-                                "",
-                                key=f"pin_{recipe_id}",
-                                type=btn_type,
-                                icon=pin_icon,
-                                help="Unpin" if is_pinned else "Pin to meal plan",
-                            ):
-                                if is_pinned:
-                                    del st.session_state.pinned_recipes[recipe_id]
-                                else:
-                                    st.session_state.pinned_recipes[recipe_id] = recipe["title"]
-                                st.rerun()
+                        if st.button(
+                            "",
+                            key=f"arrow_{recipe_id}",
+                            icon=arrow_icon,
+                            type="secondary",
+                        ):
+                            if is_viewing:
+                                del st.session_state["viewing_recipe"]
+                            else:
+                                st.session_state.viewing_recipe = recipe_id
+                            st.rerun()
+                    with title_col:
+                        if st.button(
+                            recipe["title"],
+                            key=f"view_{recipe_id}",
+                            use_container_width=True,
+                            type="tertiary",
+                        ):
+                            if is_viewing:
+                                del st.session_state["viewing_recipe"]
+                            else:
+                                st.session_state.viewing_recipe = recipe_id
+                            st.rerun()
+                    with pin_col:
+                        btn_type = "primary" if is_pinned else "tertiary"
+                        pin_icon = ":material/push_pin:" if is_pinned else ":material/keep:"
+                        if st.button(
+                            "",
+                            key=f"pin_{recipe_id}",
+                            type=btn_type,
+                            icon=pin_icon,
+                            help="Unpin" if is_pinned else "Pin to meal plan",
+                        ):
+                            if is_pinned:
+                                del st.session_state.pinned_recipes[recipe_id]
+                            else:
+                                st.session_state.pinned_recipes[recipe_id] = recipe["title"]
+                            st.rerun()
 
-                # --- Inline detail panel (below the row containing the clicked card) ---
-                for recipe in row_recipes:
-                    if st.session_state.get("viewing_recipe") == recipe["id"]:
-                        details = get_recipe_details(conn, recipe["id"])
-                        if details:
-                            with st.container(border=True):
-                                info_col, ing_col = st.columns(2)
-                                with info_col:
-                                    st.markdown(f"**Protein:** {details['protein']}")
-                                    st.markdown(f"**Servings:** {details.get('servings') or 4}")
-                                    if details.get("tags"):
-                                        tag_html = " ".join(
-                                            f"<span>{t}</span>"
-                                            for t in details["tags"]
+            # --- Inline detail panel (below the carousel) ---
+            for recipe in section_recipes:
+                if st.session_state.get("viewing_recipe") == recipe["id"]:
+                    details = get_recipe_details(conn, recipe["id"])
+                    if details:
+                        with st.container(border=True):
+                            info_col, ing_col = st.columns(2)
+                            with info_col:
+                                st.markdown(f"**Protein:** {details['protein']}")
+                                st.markdown(f"**Servings:** {details.get('servings') or 4}")
+                                if details.get("tags"):
+                                    tag_html = " ".join(
+                                        f"<span>{t}</span>"
+                                        for t in details["tags"]
+                                    )
+                                    st.markdown(
+                                        f'<div class="recipe-tags">{tag_html}</div>',
+                                        unsafe_allow_html=True,
+                                    )
+                            with ing_col:
+                                lines = []
+                                for ing in details["ingredients"]:
+                                    optional = " *(optional)*" if ing["is_optional"] else ""
+                                    if ing.get("qty"):
+                                        qs = format_qty(ing["qty"])
+                                        unit = f" {ing['unit']}" if ing.get("unit") else ""
+                                        lines.append(
+                                            f"- {qs}{unit} {ing['normalized_name']}{optional}"
                                         )
-                                        st.markdown(
-                                            f'<div class="recipe-tags">{tag_html}</div>',
-                                            unsafe_allow_html=True,
-                                        )
-                                with ing_col:
-                                    lines = []
-                                    for ing in details["ingredients"]:
-                                        optional = " *(optional)*" if ing["is_optional"] else ""
-                                        if ing.get("qty"):
-                                            qs = format_qty(ing["qty"])
-                                            unit = f" {ing['unit']}" if ing.get("unit") else ""
-                                            lines.append(
-                                                f"- {qs}{unit} {ing['normalized_name']}{optional}"
-                                            )
-                                        else:
-                                            lines.append(f"- {ing['normalized_name']}{optional}")
-                                    st.markdown("**Ingredients:**\n" + "\n".join(lines))
+                                    else:
+                                        lines.append(f"- {ing['normalized_name']}{optional}")
+                                st.markdown("**Ingredients:**\n" + "\n".join(lines))
 
 else:
     st.info("No recipes match the current filters.")
