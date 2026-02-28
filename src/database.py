@@ -480,26 +480,28 @@ def get_shopping_list(conn: sqlite3.Connection, plan_id: int) -> list[dict[str, 
         if qty and row["plan_servings"] and row["recipe_servings"]:
             qty = qty * row["plan_servings"] / row["recipe_servings"]
 
-        if name not in groups:
-            groups[name] = {
+        # Group by name+unit so mismatched units stay as separate lines
+        unit = row["unit"]
+        key = (name, unit)
+
+        if key not in groups:
+            groups[key] = {
                 "normalized_name": name,
                 "display_name": row["display_name"],
                 "needed_for": row["recipe_title"],
                 "in_pantry": row["in_pantry"],
                 "qty": qty,
-                "unit": row["unit"],
+                "unit": unit,
                 "_recipes": {row["recipe_title"]},
             }
         else:
-            entry = groups[name]
+            entry = groups[key]
             entry["_recipes"].add(row["recipe_title"])
             entry["needed_for"] = ", ".join(sorted(entry["_recipes"]))
-            # Sum compatible quantities
-            if qty and entry["qty"] and entry["unit"] == row["unit"]:
+            if qty and entry["qty"]:
                 entry["qty"] += qty
             elif qty and not entry["qty"]:
                 entry["qty"] = qty
-                entry["unit"] = row["unit"]
 
     result = []
     for entry in groups.values():
@@ -554,6 +556,14 @@ def get_user_settings(conn: sqlite3.Connection) -> dict[str, Any] | None:
     """Get user settings, or None if onboarding hasn't been completed."""
     row = conn.execute("SELECT * FROM user_settings WHERE id = 1").fetchone()
     return dict(row) if row else None
+
+
+def delete_recipe(conn: sqlite3.Connection, recipe_id: str) -> None:
+    """Delete a recipe and its ingredients/tags."""
+    conn.execute("DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe_id,))
+    conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (recipe_id,))
+    conn.execute("DELETE FROM recipes WHERE id = ?", (recipe_id,))
+    conn.commit()
 
 
 def clear_user_data(conn: sqlite3.Connection) -> None:

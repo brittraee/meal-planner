@@ -11,6 +11,7 @@ from src.database import (
     init_db,
     insert_recipe_dict,
 )
+from src.ingredients import SECTION_MAP, normalize
 from src.scraper import scrape_recipe
 
 st.title("Add Recipe")
@@ -84,6 +85,17 @@ with tab_url:
             selected_tags.extend(t.strip().lower() for t in new_tags.split(",") if t.strip())
         data["tags"] = selected_tags
 
+        # Warn about unknown ingredients
+        unknowns = [
+            i["normalized_name"] for i in data["ingredients"]
+            if i["normalized_name"] and i["normalized_name"] not in SECTION_MAP
+        ]
+        if unknowns:
+            st.warning(
+                f"**{len(unknowns)} unknown ingredients** (will show as 'other' on shopping lists): "
+                + ", ".join(sorted(set(unknowns)))
+            )
+
         if st.button("Save Recipe", key="save_url"):
             # Regenerate ID from possibly edited title
             slug = re.sub(r"[^a-z0-9]+", "_", data["title"].lower()).strip("_")
@@ -149,7 +161,7 @@ with tab_manual:
             raw = f"{qty} {unit} {name}".strip() if qty else name
             ingredients.append({
                 "raw_text": raw,
-                "normalized_name": name.lower().strip(),
+                "normalized_name": normalize(name),
                 "is_optional": False,
                 "qty": parsed_qty,
                 "unit": unit.strip() or None,

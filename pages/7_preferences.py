@@ -1,4 +1,4 @@
-"""Preferences — adjust servings, meals per week, and manage pantry."""
+"""Preferences — adjust servings and meals per week."""
 
 import streamlit as st
 
@@ -100,3 +100,14 @@ if st.session_state.get("confirm_clear"):
                 st.rerun()
 
     _confirm_clear()
+
+# --- Re-run setup ---
+st.divider()
+if st.button(
+    "Re-run Setup",
+    icon=":material/rocket_launch:",
+    type="tertiary",
+    help="Reset everything and go through the setup page again.",
+):
+    clear_user_data(conn)
+    st.switch_page("pages/0_setup.py")

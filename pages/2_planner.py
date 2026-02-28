@@ -108,7 +108,7 @@ if pinned:
 else:
     st.caption(
         "No pinned recipes — the planner will pick for you. "
-        "Or pin specific recipes from the Recipe Browser."
+        "Or pin specific recipes from the Recipe Library."
     )
 
 # --- Generate plan ---

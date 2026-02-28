@@ -1,4 +1,4 @@
-"""Recipe browser — single scrollable page grouped by protein."""
+"""Recipe Library — browsable recipe collection grouped by protein."""
 
 import streamlit as st
 
@@ -38,12 +38,25 @@ st.markdown(
         border-color: rgba(128, 128, 128, 0.25);
     }
 
-    /* Pinned card: gold tint using app accent */
+    /* Pinned card: warm terracotta tint */
     [data-testid="stVerticalBlockBorderWrapper"]:has(
-        button[data-testid="stBaseButton-secondary"]:not([kind="tertiary"])
+        button[data-testid="stBaseButton-primary"]
     ) {
-        background-color: rgba(203, 158, 33, 0.08);
-        border-color: rgba(203, 158, 33, 0.4);
+        background-color: rgba(194, 105, 79, 0.08);
+        border-color: rgba(194, 105, 79, 0.35);
+    }
+
+    /* Pinned pin button: compact, above click overlay, red icon */
+    [data-testid="stBaseButton-primary"] {
+        position: relative;
+        z-index: 2;
+    }
+    button[data-testid="stBaseButton-primary"] {
+        padding: 0.15rem 0.4rem;
+        min-height: 0;
+        background: transparent !important;
+        border: none !important;
+        color: #D4553B !important;
     }
 
     /* Stretch title button click area to fill card */
@@ -57,7 +70,7 @@ st.markdown(
         z-index: 1;
     }
 
-    /* Pin button: above click overlay, compact */
+    /* Arrow button: above click overlay, compact */
     [data-testid="stBaseButton-secondary"] {
         position: relative;
         z-index: 2;
@@ -80,6 +93,26 @@ st.markdown(
     /* ---- Section expanders: breathing room ---- */
     [data-testid="stExpander"] {
         margin-bottom: 0.5rem;
+    }
+
+    /* ---- Section expander headers: bigger click target, visible arrow ---- */
+    [data-testid="stExpander"] summary {
+        padding: 0.65rem 0.75rem;
+        border-radius: 6px;
+        transition: background-color 0.15s ease;
+        cursor: pointer;
+    }
+    [data-testid="stExpander"] summary:hover {
+        background-color: rgba(128, 128, 128, 0.1);
+    }
+    [data-testid="stExpander"] summary p {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    [data-testid="stExpander"] summary svg {
+        width: 1.25em;
+        height: 1.25em;
+        opacity: 0.9;
     }
     </style>
     """,
@@ -188,15 +221,15 @@ SECTION_ORDER = [
 
 # Accent colors per section (warm for meat, cool for seafood, green for plant)
 SECTION_COLORS = {
-    "My Recipes": "#cb9e21",
-    "Breakfast": "#FFD54F",
-    "Poultry": "#E8985A",
-    "Beef": "#C45B4A",
-    "Pork": "#D4785C",
-    "Seafood": "#4A90A4",
-    "Vegetarian": "#6ABF69",
-    "Vegan": "#4CAF50",
-    "Side": "#8DB580",
+    "My Recipes": "#C2694F",
+    "Breakfast": "#D4956A",
+    "Poultry": "#C2694F",
+    "Beef": "#A0522D",
+    "Pork": "#B87850",
+    "Seafood": "#5E8E8B",
+    "Vegetarian": "#7D9B76",
+    "Vegan": "#6B8E5A",
+    "Side": "#8B8B3A",
 }
 
 
@@ -275,11 +308,22 @@ if results:
                             [0.5, 5, 0.5]
                         )
                         with arrow_col:
-                            st.markdown(
-                                f'<div style="text-align:center;padding-top:0.35rem;'
-                                f'font-size:0.7rem;opacity:0.5">{arrow}</div>',
-                                unsafe_allow_html=True,
+                            arrow_icon = (
+                                ":material/expand_more:"
+                                if is_viewing
+                                else ":material/chevron_right:"
                             )
+                            if st.button(
+                                "",
+                                key=f"arrow_{recipe_id}",
+                                icon=arrow_icon,
+                                type="secondary",
+                            ):
+                                if is_viewing:
+                                    del st.session_state["viewing_recipe"]
+                                else:
+                                    st.session_state.viewing_recipe = recipe_id
+                                st.rerun()
                         with title_col:
                             if st.button(
                                 recipe["title"],
@@ -293,7 +337,7 @@ if results:
                                     st.session_state.viewing_recipe = recipe_id
                                 st.rerun()
                         with pin_col:
-                            btn_type = "secondary" if is_pinned else "tertiary"
+                            btn_type = "primary" if is_pinned else "tertiary"
                             pin_icon = ":material/push_pin:" if is_pinned else ":material/keep:"
                             if st.button(
                                 "",

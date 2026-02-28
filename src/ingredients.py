@@ -23,6 +23,8 @@ _IRREGULAR_PLURALS: dict[str, str] = {
     "dates": "dates",
     "noodles": "noodles",
     "meatballs": "meatballs",
+    "zucchinis": "zucchini",
+    "mushrooms": "mushroom",
 }
 
 # Alias map: variant -> canonical name
@@ -63,6 +65,54 @@ ALIASES: dict[str, str] = {
     "ranch dressing": "ranch dressing",
     "brown gravy mix or pan gravy": "brown gravy mix",
     "chipotle chili paste or seasoning": "chipotle seasoning",
+    # Produce variants
+    "garlic cloves": "garlic",
+    "garlic clove": "garlic",
+    "yellow onion": "onion",
+    "white onion": "onion",
+    "sweet onion": "onion",
+    # Oil/fat variants
+    "extra virgin olive oil": "olive oil",
+    "extra-virgin olive oil": "olive oil",
+    "evoo": "olive oil",
+    "unsalted butter": "butter",
+    "salted butter": "butter",
+    # Seasoning variants
+    "kosher salt": "salt",
+    "sea salt": "salt",
+    "ground black pepper": "black pepper",
+    "freshly ground black pepper": "black pepper",
+    "cracked black pepper": "black pepper",
+    "ground pepper": "black pepper",
+    # Dairy variants
+    "plain greek yogurt": "greek yogurt",
+    # Compound seasoning lines
+    "kosher salt and ground black pepper": "salt",
+    "salt and pepper": "salt",
+    "salt and pepper to taste": "salt",
+    "kosher salt and black pepper": "salt",
+    "kosher salt and pepper": "salt",
+    "fine sea salt": "salt",
+    "fine sea salt and -ground black pepper": "salt",
+    "fine sea salt and -cracked black pepper": "salt",
+    "pinch of salt and black pepper": "salt",
+    "half and half": "half and half",
+    "half and half*": "half and half",
+    "green onions": "green onion",
+    "spring onions": "green onion",
+    "scallions": "green onion",
+    "salt and black pepper": "salt",
+    # Dried herb variants
+    "dried thyme": "thyme",
+    "dried basil": "basil",
+    "dried rosemary": "rosemary",
+    "dried parsley": "parsley",
+    "dried dill": "dill",
+    "dried oregano": "oregano",
+    # Common product descriptions
+    "all-purpose flour": "flour",
+    "all purpose flour": "flour",
+    "ap flour": "flour",
 }
 
 # Store section classification
@@ -233,6 +283,22 @@ SECTION_MAP: dict[str, str] = {
     "ranch seasoning": "pantry",
     "chipotle seasoning": "pantry",
     "brown gravy mix": "pantry",
+    # Pantry — herbs
+    "thyme": "pantry",
+    "basil": "pantry",
+    "rosemary": "pantry",
+    "parsley": "pantry",
+    "dill": "pantry",
+    "bay leaf": "pantry",
+    "black pepper": "pantry",
+    # Pantry — pasta & noodles
+    "penne": "pantry",
+    "ziti": "pantry",
+    "rotini": "pantry",
+    "fettuccine": "pantry",
+    "egg noodles": "pantry",
+    "vermicelli": "pantry",
+    "wonton wrapper": "pantry",
     # Pantry — nuts & seeds
     "peanuts": "pantry",
     "cashews": "pantry",
@@ -245,7 +311,16 @@ SECTION_MAP: dict[str, str] = {
     "frozen shrimp": "frozen",
     "hash browns": "frozen",
     "cauliflower rice": "frozen",
+    "puff pastry": "frozen",
+    # Dairy — additional
+    "half and half": "dairy",
 }
+
+# Common staples to pre-populate on first run
+DEFAULT_PANTRY = [
+    "Salt", "Pepper", "Olive oil", "Butter", "Garlic powder",
+    "Onion powder", "Sugar", "Flour", "Vegetable oil",
+]
 
 
 def normalize(name: str) -> str:

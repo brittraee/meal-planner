@@ -89,7 +89,7 @@ class Recipe:
 
 @dataclass(frozen=True)
 class Preferences:
-    """User dietary preferences loaded from YAML."""
+    """User dietary preferences."""
 
     people: str = ""
     style: str = "easy_weeknights"
@@ -102,7 +102,7 @@ class Preferences:
 
 @dataclass(frozen=True)
 class Pantry:
-    """Items on hand, loaded from YAML."""
+    """Items currently on hand."""
 
     staples: tuple[str, ...] = ()
     fresh: tuple[str, ...] = ()

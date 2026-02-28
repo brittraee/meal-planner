@@ -127,6 +127,16 @@ _UNIT_ALIASES: dict[str, str] = {
     "bags": "bag",
 }
 
+# Common grocery store brand prefixes to strip
+_BRAND_RE = re.compile(
+    r"\b(appleton farms|baker'?s corner|chef'?s cupboard|countryside creamery|"
+    r"simplynature|stonemill|priano|gold seal|ore[- ]?ida|heinz|bob'?s red mill|"
+    r"pace|bertolli|frank'?s|hidden valley|mccormick|old el paso|ro[- ]?tel|"
+    r"bush'?s|hunt'?s|del monte|kraft|barilla|season'?s choice|"
+    r"cooked perfect|simply nature|mrs\.? dash)\b\s*",
+    re.IGNORECASE,
+)
+
 # Size words between qty and ingredient name (not units)
 _SKIP_WORDS = {"large", "medium", "small", "whole", "extra", "thin", "thick"}
 
@@ -136,7 +146,9 @@ _DESCRIPTOR_RE = re.compile(
     r"boneless|skinless|chopped|diced|minced|sliced|shredded|grated|"
     r"melted|softened|crushed|torn|peeled|seeded|trimmed|halved|"
     r"quartered|cubed|julienned|thinly|roughly|finely|coarsely|"
-    r"freshly|lightly|well|very|about|approximately"
+    r"freshly|lightly|well|very|about|approximately|"
+    r"cooked|toasted|crumbled|packed|slivered|"
+    r"bone-in|skin-on"
     r")\b",
     re.IGNORECASE,
 )
@@ -163,11 +175,44 @@ def _parse_num(text: str) -> float:
 
 
 def _clean_name(name: str) -> str:
-    """Strip descriptors and parentheticals from an ingredient name."""
+    """Strip descriptors, parentheticals, and prep instructions from an ingredient name."""
     name = re.sub(r"\([^)]*\)", "", name)
+    # Strip unclosed trailing parens: "jalapeño ( into thin rings" → "jalapeño"
+    name = re.sub(r"\s*\([^)]*$", "", name)
+    # Strip grocery brand prefixes: "Baker's Corner flour" → "flour"
+    name = _BRAND_RE.sub("", name)
+    # Strip prep instructions after comma BEFORE descriptors (order matters:
+    # "spinach, cooked down" → "spinach" not "spinach, down")
+    name = re.sub(
+        r",\s*(?:cut |into |rinsed|drained|divided|to taste|plus |removed|"
+        r"with ribs|with seeds|stemmed|cored|seeded|zested?|juiced|"
+        r"undiluted|uncooked|thawed|defrosted|at room temp|see notes|"
+        r"fat |and cooked|and |or |green and white|white and green|"
+        r"zest and|juice and|juice of|for serving|for garnish|for topping|"
+        r"lengthwise|on a |deveined|optional|tightly|cooked|toasted|"
+        r"crumbled|packed|beaten|soaked|rough|preferably|seeds ok|"
+        # Descriptors that appear between comma and prep instructions:
+        r"chopped|diced|minced|sliced|shredded|grated|peeled|"
+        r"cubed|julienned|halved|quartered|trimmed|"
+        r"finely|roughly|thinly|coarsely|lightly|freshly|"
+        r"undrained|pressed|juice |best ).*$",
+        "", name, flags=re.IGNORECASE,
+    )
     name = _DESCRIPTOR_RE.sub(" ", name)
     name = re.sub(r"\s*,\s*$", "", name)
     name = re.sub(r"^,\s*", "", name)
+    # Strip comma followed by weight/count: "zucchini, 1 pound" → "zucchini"
+    name = re.sub(r",\s*\d.*$", "", name)
+    # Strip "X + Y, for serving" garnish additions
+    name = re.sub(r"\s*\+.*$", "", name)
+    # Strip trailing lone parens: "tomatoes, )" → "tomatoes,"
+    name = re.sub(r"\s*\)\s*$", "", name)
+    # Strip leading "of" or "a" from "of cooked bacon", "a jalapeno" etc.
+    name = re.sub(r"^(?:of|a)\s+", "", name, flags=re.IGNORECASE)
+    # Strip lines that are just topping/optional lists
+    lower = name.lower().strip()
+    if lower.startswith(("optional:", "toppings:", "toppings!", "other toppings")):
+        return ""
     return " ".join(name.split()).strip(" ,;-")
 
 
@@ -268,22 +313,14 @@ def _fetch_html(url: str) -> str:
 
 
 def scrape_recipe(url: str) -> dict[str, Any]:
-    """Scrape a recipe URL and return a structured dict.
-
-    Returns a dict matching the insert_recipe_dict() format:
-        id, title, protein, servings, source_url, source_type,
-        instructions, image_url, ingredients (list), tags (list).
-
-    Raises:
-        Exception: If the URL cannot be scraped.
-    """
+    """Scrape a recipe URL and return a dict matching insert_recipe_dict() format."""
     html = _fetch_html(url)
     scraper = scrape_html(html, org_url=url)
 
     title = scraper.title()
     recipe_id = _slugify(title)
 
-    # Parse ingredients with proper qty/unit/name extraction
+    # Parse ingredients into qty/unit/name
     ingredients = []
     for line in scraper.ingredients():
         qty, unit, name = parse_ingredient_line(line)
@@ -297,7 +334,7 @@ def scrape_recipe(url: str) -> dict[str, Any]:
             }
         )
 
-    # Build tags from category if available
+    # Tags from category
     tags = []
     try:
         cat = scraper.category()
@@ -306,7 +343,6 @@ def scrape_recipe(url: str) -> dict[str, Any]:
     except (AttributeError, NotImplementedError):
         pass
 
-    # Get servings as int
     servings = 4
     try:
         raw_yields = scraper.yields()
@@ -317,12 +353,10 @@ def scrape_recipe(url: str) -> dict[str, Any]:
     except (AttributeError, NotImplementedError):
         pass
 
-    # Get image
     image_url = ""
     with contextlib.suppress(AttributeError, NotImplementedError):
         image_url = scraper.image() or ""
 
-    # Get instructions
     instructions = ""
     with contextlib.suppress(AttributeError, NotImplementedError):
         instructions = scraper.instructions() or ""

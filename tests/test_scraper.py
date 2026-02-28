@@ -112,6 +112,32 @@ class TestParseIngredientLine:
         assert unit == "cup"
         assert name == "water"
 
+    def test_unclosed_paren_stripped(self):
+        _qty, _unit, name = parse_ingredient_line("1 jalapeño ( into thin rings")
+        assert "(" not in name
+        assert "ring" not in name
+
+    def test_unclosed_paren_prep_instruction(self):
+        _qty, _unit, name = parse_ingredient_line("1 can black beans (drained and rinsed")
+        assert "(" not in name
+        assert "drained" not in name
+
+    def test_brand_name_stripped(self):
+        qty, unit, name = parse_ingredient_line("1 cup Baker's Corner all-purpose flour")
+        assert qty == 1.0
+        assert unit == "cup"
+        assert name == "flour"
+
+    def test_aldi_brand_stripped(self):
+        _qty, _unit, name = parse_ingredient_line("2 tbsp Stonemill dried basil")
+        assert "stonemill" not in name.lower()
+        assert "basil" in name
+
+    def test_brand_countryside_creamery(self):
+        _qty, unit, name = parse_ingredient_line("1 cup Countryside Creamery half and half")
+        assert "countryside" not in name.lower()
+        assert "half and half" in name
+
 
 class TestSlugify:
     def test_basic(self):

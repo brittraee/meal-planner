@@ -1,6 +1,6 @@
 """Tests for ingredient parsing and normalization."""
 
-from src.ingredients import get_section, normalize, parse_ingredient
+from src.ingredients import DEFAULT_PANTRY, get_section, normalize, parse_ingredient
 
 
 class TestParseIngredient:
@@ -76,6 +76,42 @@ class TestNormalize:
 
     def test_unknown_passthrough(self):
         assert normalize("something new") == "something new"
+
+    def test_garlic_cloves(self):
+        assert normalize("garlic cloves") == "garlic"
+
+    def test_extra_virgin_olive_oil(self):
+        assert normalize("extra virgin olive oil") == "olive oil"
+
+    def test_unsalted_butter(self):
+        assert normalize("unsalted butter") == "butter"
+
+    def test_kosher_salt(self):
+        assert normalize("kosher salt") == "salt"
+
+    def test_zucchinis_plural(self):
+        assert normalize("zucchinis") == "zucchini"
+
+    def test_mushrooms_plural(self):
+        assert normalize("mushrooms") == "mushroom"
+
+    def test_compound_salt_and_pepper(self):
+        assert normalize("kosher salt and ground black pepper") == "salt"
+
+    def test_plain_greek_yogurt(self):
+        assert normalize("plain greek yogurt") == "greek yogurt"
+
+    def test_yellow_onion(self):
+        assert normalize("yellow onion") == "onion"
+
+
+class TestDefaultPantry:
+    def test_not_empty(self):
+        assert len(DEFAULT_PANTRY) > 0
+
+    def test_all_items_have_known_sections(self):
+        for item in DEFAULT_PANTRY:
+            assert get_section(item) != "other", f"{item} mapped to 'other'"
 
 
 class TestGetSection:
