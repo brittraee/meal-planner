@@ -75,7 +75,7 @@ _default_servings = _settings["servings"] if _settings else 4
 _plan_col, _serv_col = st.columns(2)
 with _plan_col:
     num_days = st.number_input(
-        "Meals to plan", min_value=3, max_value=7, value=_default_days,
+        "Meals to plan", min_value=1, max_value=7, value=_default_days,
     )
 with _serv_col:
     _default_servings = st.number_input(
@@ -89,7 +89,7 @@ _TAG_DISPLAY: dict[str, str] = {
     "batchcook": "Batch Cook",
     "onepan": "One Pan",
     "sheetpan": "Sheet Pan",
-    "breakfastfordinner": "Breakfast for Dinner",
+    "breakfast": "Breakfast",
     "sidedish": "Side Dish",
     "lowcarb": "Low Carb",
     "whole30": "Whole30",
@@ -101,9 +101,9 @@ with st.expander("Customize", expanded=True):
     lifestyle_tags = [
         t for t in available_tags if t in {
             "quick", "comfortfood", "kidfriendly", "batchcook", "onepan",
-            "healthy", "spicy", "sheetpan", "breakfastfordinner", "cheesy",
+            "healthy", "spicy", "sheetpan", "breakfast", "cheesy",
             "casserole", "bbq", "soup", "salad", "bowl", "sidedish", "bake",
-            "skillet", "chili", "tacos", "lowcarb", "vegan", "paleo", "keto",
+            "skillet", "chili", "vegan", "paleo", "keto",
             "whole30",
         }
     ]
@@ -122,10 +122,10 @@ with st.expander("Customize", expanded=True):
     # Build ingredient list from proteins + common staples
     _proteins = get_unique_proteins(conn)
     _staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
-                 "cheese", "tortilla", "noodles", "tofu"]
+                 "cheese", "tortilla", "noodles"]
     _selector_items = _proteins + [s for s in _staples if s not in _proteins]
 
-    st.markdown(":green[**Include**] — recipes must use these")
+    st.markdown(":green[**Include**] — plan must include at least one recipe with selected ingredients")
     _included = st.pills(
         "Include ingredients",
         options=_selector_items,
@@ -135,21 +135,57 @@ with st.expander("Customize", expanded=True):
         label_visibility="collapsed",
     ) or []
 
-    _exclude_options = [i for i in _selector_items if i not in _included]
-    st.markdown(":red[**Exclude**] — skip recipes with these")
-    _excluded = st.pills(
-        "Exclude ingredients",
-        options=_exclude_options,
-        selection_mode="multi",
-        format_func=str.title,
-        key="exclude_pills",
-        label_visibility="collapsed",
-    ) or []
+    # Sub-category refinement for selected proteins
+    _PROTEIN_SUBS: dict[str, list[str]] = {
+        "beef": ["ground beef", "steak", "roast", "brisket"],
+        "chicken": ["breast", "thigh", "drumstick", "whole chicken"],
+        "pork": ["pork loin", "pork tenderloin", "pork shoulder"],
+        "shrimp": ["large shrimp", "jumbo shrimp"],
+        "turkey": ["ground turkey"],
+    }
+    _sub_picks: list[str] = []
+    for _ing in _included:
+        if _ing in _PROTEIN_SUBS:
+            _subs = st.pills(
+                f"{_ing.title()} type",
+                options=_PROTEIN_SUBS[_ing],
+                selection_mode="multi",
+                format_func=str.title,
+                key=f"sub_{_ing}",
+                label_visibility="collapsed",
+            ) or []
+            _sub_picks.extend(_subs)
+
+    _excl_col, _ = st.columns([2, 3])
+    with _excl_col:
+        st.markdown(":red[**Exclude**] — recipes containing these items will be skipped")
+        _exclude_text = st.text_input(
+            "Exclude ingredients",
+            placeholder="e.g. mushroom, shrimp",
+            key="exclude_text",
+            label_visibility="collapsed",
+        )
 
     seed = 0
 
-included_list = _included or None
-excluded_list = _excluded or None
+# Build final include list: use sub-picks where available, keep top-level otherwise
+_final_included = []
+for _ing in (_included or []):
+    if _ing in _PROTEIN_SUBS and _sub_picks:
+        # Only keep sub-picks that belong to this protein
+        _my_subs = [s for s in _sub_picks if s in _PROTEIN_SUBS[_ing]]
+        if _my_subs:
+            _final_included.extend(_my_subs)
+        else:
+            _final_included.append(_ing)
+    else:
+        _final_included.append(_ing)
+
+included_list = _final_included or None
+excluded_list = (
+    [x.strip().lower() for x in _exclude_text.split(",") if x.strip()]
+    if _exclude_text else None
+)
 require_included = bool(included_list)
 
 # --- Pinned recipes section ---
@@ -252,29 +288,9 @@ if "current_plan" in st.session_state:
                 st.session_state["current_plan"] = plan_df
                 st.rerun()
 
-    # Prep notes (fall back to truncated instructions if no prep notes)
-    with st.expander("View prep notes"):
-        for _, row in plan_df.iterrows():
-            st.markdown(f"**{row['title']}**")
-            notes = row.get("prep_notes") or ""
-            if not notes.strip():
-                result = conn.execute(
-                    "SELECT instructions FROM recipes WHERE id = ?",
-                    (row["recipe_id"],),
-                ).fetchone()
-                if result and result["instructions"]:
-                    # Show first 2 sentences as a quick summary
-                    text = result["instructions"].strip()
-                    sentences = text.replace("\r\n", " ").replace("\n", " ").split(". ")
-                    notes = ". ".join(sentences[:2]).strip()
-                    if not notes.endswith("."):
-                        notes += "."
-            if notes.strip():
-                st.markdown(f"_{notes}_")
-            st.markdown("---")
-
-    # --- Save plan ---
+    # --- Save & continue ---
     st.divider()
+
     st.subheader("Save Plan")
     save_col1, save_col2 = st.columns(2)
     with save_col1:
@@ -285,20 +301,12 @@ if "current_plan" in st.session_state:
     with save_col2:
         plan_date = st.date_input("Start date", value=date.today())
 
-    if st.button("Save Plan"):
+    if st.button("Save & Continue to Shopping List", type="primary",
+                  icon=":material/shopping_cart:", use_container_width=True):
         meals = [
             (int(row["day"]), row["day_label"], row["recipe_id"], int(row["servings"]))
             for _, row in plan_df.iterrows()
         ]
         create_meal_plan(conn, plan_name, str(plan_date), meals)
-        st.session_state["plan_just_saved"] = True
         del st.session_state["current_plan"]
-        st.rerun()
-
-    if st.session_state.pop("plan_just_saved", False):
-        st.success(f"Plan saved!")
-        st.page_link(
-            "pages/3_shopping.py",
-            label="View Shopping List",
-            icon=":material/shopping_cart:",
-        )
+        st.switch_page("pages/3_shopping.py")

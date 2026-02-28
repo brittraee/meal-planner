@@ -10,6 +10,7 @@ from src.database import (
     init_db,
     search_recipes,
 )
+from src.units import format_qty
 
 # --- Custom CSS ---
 st.markdown(
@@ -143,7 +144,7 @@ if not all_recipes:
 # --- Filter bar ---
 proteins = get_unique_proteins(conn)
 # Exclude time tags and tags that duplicate ingredient/protein pills
-_SKIP_TAGS = {"pasta", "steak", "side", "staple", "taco"}
+_SKIP_TAGS = {"pasta", "steak", "side", "staple", "taco", "tacos", "lowcarb"}
 available_tags = [
     t for t in get_unique_tags(conn)
     if not t.rstrip("min").isdigit() and t not in _SKIP_TAGS
@@ -160,7 +161,7 @@ _TAG_DISPLAY: dict[str, str] = {
     "batchcook": "Batch Cook",
     "onepan": "One Pan",
     "sheetpan": "Sheet Pan",
-    "breakfastfordinner": "Breakfast for Dinner",
+    "breakfast": "Breakfast",
     "sidedish": "Side Dish",
     "lowcarb": "Low Carb",
     "whole30": "Whole30",
@@ -175,9 +176,9 @@ with search_col:
 
 # Ingredient pills
 _staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
-             "cheese", "tortilla", "noodles", "tofu"]
+             "cheese", "tortilla", "noodles"]
 _ing_options = proteins + [s for s in _staples if s not in proteins]
-st.markdown("**Ingredients**")
+st.markdown("**Ingredients** — show recipes with any of these")
 selected_ingredients = st.pills(
     "Filter by ingredient",
     options=_ing_options,
@@ -186,6 +187,39 @@ selected_ingredients = st.pills(
     key="recipe_ingredient_pills",
     label_visibility="collapsed",
 ) or []
+
+# Sub-category refinement for selected proteins
+_PROTEIN_SUBS: dict[str, list[str]] = {
+    "beef": ["ground beef", "steak", "roast", "brisket"],
+    "chicken": ["breast", "thigh", "drumstick", "whole chicken"],
+    "pork": ["pork loin", "pork tenderloin", "pork shoulder"],
+    "shrimp": ["large shrimp", "jumbo shrimp"],
+    "turkey": ["ground turkey"],
+}
+_sub_picks: list[str] = []
+for _ing in selected_ingredients:
+    if _ing in _PROTEIN_SUBS:
+        _subs = st.pills(
+            f"{_ing.title()} type",
+            options=_PROTEIN_SUBS[_ing],
+            selection_mode="multi",
+            format_func=str.title,
+            key=f"recipe_sub_{_ing}",
+            label_visibility="collapsed",
+        ) or []
+        _sub_picks.extend(_subs)
+
+# Build final ingredient list: use sub-picks where available
+_final_ingredients: list[str] = []
+for _ing in selected_ingredients:
+    if _ing in _PROTEIN_SUBS and _sub_picks:
+        _my_subs = [s for s in _sub_picks if s in _PROTEIN_SUBS[_ing]]
+        if _my_subs:
+            _final_ingredients.extend(_my_subs)
+        else:
+            _final_ingredients.append(_ing)
+    else:
+        _final_ingredients.append(_ing)
 
 # Tag pills
 st.markdown("**Tags**")
@@ -206,7 +240,7 @@ results = search_recipes(
     query=search_text or None,
     tags=selected_tags or None,
     max_time=max_time,
-    ingredients=selected_ingredients or None,
+    ingredients=_final_ingredients or None,
 )
 
 # --- Sidebar: pinned recipes + planner link ---
@@ -239,7 +273,7 @@ with st.sidebar:
         st.caption("Pin recipes to build your meal plan.")
 
 # --- Group recipes by section ---
-BREAKFAST_TAGS = {"breakfastfordinner", "brinner", "breakfast"}
+BREAKFAST_TAGS = {"breakfast", "brinner"}
 
 SECTION_ICONS = {
     "My Recipes": "\U0001f516",
@@ -415,8 +449,7 @@ if results:
                                     for ing in details["ingredients"]:
                                         optional = " *(optional)*" if ing["is_optional"] else ""
                                         if ing.get("qty"):
-                                            q = ing["qty"]
-                                            qs = str(int(q)) if q == int(q) else f"{q:g}"
+                                            qs = format_qty(ing["qty"])
                                             unit = f" {ing['unit']}" if ing.get("unit") else ""
                                             lines.append(
                                                 f"- {qs}{unit} {ing['normalized_name']}{optional}"

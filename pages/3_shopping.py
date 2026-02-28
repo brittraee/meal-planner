@@ -14,11 +14,10 @@ from src.database import (
 from src.ingredients import get_ingredients_by_section, get_section, normalize
 from src.shopping import (
     SECTION_ORDER,
-    format_shopping_json,
-    format_shopping_markdown,
     format_shopping_text,
     group_by_section,
 )
+from src.units import format_qty
 
 st.title("Shopping List")
 st.caption("Grouped by store section, pantry items filtered out.")
@@ -116,7 +115,7 @@ def _display_name(item: dict) -> str:
     unit = item.get("unit")
     name = item["normalized_name"]
     if qty:
-        qty_str = str(int(qty)) if qty == int(qty) else f"{qty:.2f}".rstrip("0").rstrip(".")
+        qty_str = format_qty(qty)
         if unit:
             return f"{qty_str} {unit} {name}"
         return f"{qty_str} {name}"
@@ -132,13 +131,15 @@ if need_items:
     if "checked_items" not in st.session_state:
         st.session_state["checked_items"] = set()
 
+    _item_idx = 0
     sections = group_by_section(need_items)
     for section in SECTION_ORDER:
         if section not in sections:
             continue
         st.markdown(f"#### {section.title()}")
         for item in sections[section]:
-            key = f"shop_{item['normalized_name']}"
+            key = f"shop_{_item_idx}"
+            _item_idx += 1
             label = f"**{_display_name(item)}** — _{item['needed_for']}_"
             checked = st.checkbox(
                 label,
@@ -155,27 +156,6 @@ if have_items:
     for item in have_items:
         st.markdown(f"- ~~{_display_name(item)}~~")
 
-# --- Copy & Export ---
-st.subheader("Share & Export")
-
-# Clipboard-friendly plain text (st.code renders with a built-in copy button)
+# --- Copy to clipboard ---
 with st.expander("Copy to clipboard"):
     st.code(format_shopping_text(items), language=None)
-
-col1, col2 = st.columns(2)
-with col1:
-    md = format_shopping_markdown(items)
-    st.download_button(
-        "Download Markdown",
-        data=md,
-        file_name="shopping-list.md",
-        mime="text/markdown",
-    )
-with col2:
-    json_str = format_shopping_json(items)
-    st.download_button(
-        "Download JSON",
-        data=json_str,
-        file_name="shopping-list.json",
-        mime="application/json",
-    )

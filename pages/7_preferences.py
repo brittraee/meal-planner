@@ -21,19 +21,23 @@ settings = get_user_settings(conn)
 current_servings = settings["servings"] if settings else 4
 current_meals = settings["meals_per_week"] if settings else 5
 
-servings = st.slider(
-    "Default servings per meal",
-    min_value=1,
-    max_value=10,
-    value=current_servings,
-    help="Includes adults + kids. You can adjust per-meal later.",
-)
-meals_per_week = st.select_slider(
-    "Dinners to plan per week",
-    options=list(range(1, 8)),
-    value=current_meals,
-    help="Most households do 4-6, leaving room for leftovers or takeout.",
-)
+_serv_col, _meal_col = st.columns(2)
+with _serv_col:
+    servings = st.number_input(
+        "Default servings per meal",
+        min_value=1,
+        max_value=10,
+        value=current_servings,
+        help="Includes adults + kids. You can adjust per-meal later.",
+    )
+with _meal_col:
+    meals_per_week = st.number_input(
+        "Dinners to plan per week",
+        min_value=1,
+        max_value=7,
+        value=current_meals,
+        help="Most households do 4-6, leaving room for leftovers or takeout.",
+    )
 
 if servings != current_servings or meals_per_week != current_meals:
     save_user_settings(conn, servings, meals_per_week)

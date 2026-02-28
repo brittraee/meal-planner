@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from fractions import Fraction
 from typing import Any
 
 # Canonical unit aliases: variant → standard form
@@ -183,7 +184,7 @@ def convert_and_sum(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
             })
         else:
             # Format the aggregated quantity
-            display_qty = _format_qty(total)
+            display_qty = format_qty(total)
             unit_str = target_unit or ""
             display = f"{display_qty} {unit_str} {name}".strip()
 
@@ -199,8 +200,14 @@ def convert_and_sum(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return result
 
 
-def _format_qty(qty: float) -> str:
-    """Format a quantity for display, removing trailing zeros."""
+def format_qty(qty: float) -> str:
+    """Format a quantity for display using fractions (e.g. 1/3, 1/2)."""
     if qty == int(qty):
         return str(int(qty))
-    return f"{qty:.2f}".rstrip("0").rstrip(".")
+    whole = int(qty)
+    remainder = qty - whole
+    frac = Fraction(remainder).limit_denominator(8)
+    if frac.numerator == 0:
+        return str(whole) if whole else "0"
+    frac_str = f"{frac.numerator}/{frac.denominator}"
+    return f"{whole} {frac_str}" if whole else frac_str
