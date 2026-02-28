@@ -4,7 +4,7 @@ import streamlit as st
 
 from src.database import (
     add_pantry_item,
-    delete_pantry_item,
+    clear_pantry,
     get_connection,
     get_pantry_items,
     init_db,
@@ -14,11 +14,6 @@ from src.ingredients import DEFAULT_PANTRY, get_ingredients_by_section, get_sect
 
 conn = get_connection()
 init_db(conn)
-
-# Pre-populate common staples on first visit
-if not get_pantry_items(conn):
-    for item in DEFAULT_PANTRY:
-        add_pantry_item(conn, item, normalize(item), get_section(item))
 
 # ---------------------------------------------------------------------------
 # Welcome screen (shown before setup form)
@@ -65,75 +60,76 @@ st.caption("Set your defaults, then head to the Recipe Library.")
 # --- Section 1: Meal defaults ---
 st.subheader("Meal Defaults")
 
-servings = st.slider(
-    "Default servings per meal",
-    min_value=1,
-    max_value=10,
-    value=4,
-    help="Includes adults + kids. You can adjust per-meal later.",
-)
-meals_per_week = st.select_slider(
-    "Dinners to plan per week",
-    options=list(range(1, 8)),
-    value=5,
-    help="Most households do 4-6, leaving room for leftovers or takeout.",
-)
+_serv_col, _meal_col = st.columns(2)
+with _serv_col:
+    servings = st.number_input(
+        "Default servings per meal",
+        min_value=1,
+        max_value=10,
+        value=4,
+        help="Includes adults + kids. You can adjust per-meal later.",
+    )
+with _meal_col:
+    meals_per_week = st.number_input(
+        "Dinners to plan per week",
+        min_value=1,
+        max_value=7,
+        value=5,
+        help="Most households do 4-6, leaving room for leftovers or takeout.",
+    )
 
 # --- Section 2: Quick pantry setup ---
 st.divider()
 st.subheader("Pantry Staples")
 st.caption(
-    "Add what you keep on hand — these get skipped on shopping lists "
-    "so you only buy what you need."
+    "Select what you keep on hand — these get skipped on shopping lists. "
+    "Common staples are pre-selected."
 )
 
-items = get_pantry_items(conn)
-current_names = {i["normalized_name"] for i in items}
-
-# Show what's already in the pantry
-if items:
-    st.markdown("**Already added:**")
-    # Group by category for display
-    by_cat: dict[str, list[dict]] = {}
-    for item in items:
-        cat = item["category"] or "other"
-        by_cat.setdefault(cat, []).append(item)
-
-    for cat, cat_items in sorted(by_cat.items()):
-        names = ", ".join(i["name"] for i in cat_items)
-        st.caption(f"**{cat.title()}** — {names}")
-
-    st.markdown("")
-
-# Add more items via pills
+# Initialize pill defaults: use existing pantry if available, else DEFAULT_PANTRY
 sections = get_ingredients_by_section()
+if "setup_pantry_initialized" not in st.session_state:
+    existing = get_pantry_items(conn)
+    if existing:
+        preselected = {i["normalized_name"] for i in existing}
+    else:
+        preselected = {normalize(name) for name in DEFAULT_PANTRY}
+    for section, section_items in sections.items():
+        key = f"setup_pantry_{section}"
+        st.session_state[key] = [
+            i for i in section_items if normalize(i) in preselected
+        ]
+    st.session_state.setup_pantry_initialized = True
+
+# Show all items as pills with defaults pre-selected
 tabs = st.tabs(list(sections.keys()))
+total_selected = 0
 
 for tab, (section, section_items) in zip(tabs, sections.items(), strict=False):
     with tab:
-        available = [i for i in section_items if normalize(i) not in current_names]
-        if available:
-            chosen = st.pills(
-                f"Select {section.lower()} items",
-                options=available,
-                selection_mode="multi",
-                key=f"setup_pantry_{section}",
-                label_visibility="collapsed",
-            )
-            if chosen:
-                for item in chosen:
-                    add_pantry_item(conn, item, normalize(item), get_section(item))
-                st.rerun()
-        else:
-            st.caption("All items from this section are in your pantry.")
+        chosen = st.pills(
+            f"Select {section.lower()} items",
+            options=section_items,
+            selection_mode="multi",
+            key=f"setup_pantry_{section}",
+            label_visibility="collapsed",
+        ) or []
+        total_selected += len(chosen)
 
-pantry_count = len(get_pantry_items(conn))
-if pantry_count:
-    st.success(f"{pantry_count} pantry items added.")
+if total_selected:
+    st.success(f"{total_selected} pantry items selected.")
 
 # --- Save & Start ---
 st.divider()
 if st.button("Save & Start", type="primary", icon=":material/rocket_launch:"):
+    # Sync pill selections to DB
+    clear_pantry(conn)
+    for section, section_items in sections.items():
+        key = f"setup_pantry_{section}"
+        selected = st.session_state.get(key, [])
+        for name in selected:
+            add_pantry_item(conn, name, normalize(name), get_section(name))
     save_user_settings(conn, servings, meals_per_week)
     st.session_state.pop("show_setup_form", None)
+    st.session_state.pop("setup_pantry_initialized", None)
     st.switch_page("pages/1_recipes.py")
