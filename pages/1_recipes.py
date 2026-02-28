@@ -142,7 +142,12 @@ if not all_recipes:
 
 # --- Filter bar ---
 proteins = get_unique_proteins(conn)
-available_tags = [t for t in get_unique_tags(conn) if not t.rstrip("min").isdigit()]
+# Exclude time tags and tags that duplicate ingredient/protein pills
+_SKIP_TAGS = {"pasta", "steak", "side", "staple", "taco"}
+available_tags = [
+    t for t in get_unique_tags(conn)
+    if not t.rstrip("min").isdigit() and t not in _SKIP_TAGS
+]
 time_options = ["Any", "15 min", "30 min", "45 min", "60 min", "90 min", "120 min"]
 time_values = {
     "Any": None, "15 min": 15, "30 min": 30, "45 min": 45,
