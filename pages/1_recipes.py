@@ -479,3 +479,11 @@ if results:
 
 else:
     st.info("No recipes match the current filters.")
+
+# --- Bottom navigation to Meal Planner ---
+st.divider()
+st.page_link(
+    "pages/2_planner.py",
+    label=f"Continue to Meal Planner ({len(pinned)} pinned)" if pinned else "Continue to Meal Planner",
+    icon=":material/arrow_forward:",
+)
