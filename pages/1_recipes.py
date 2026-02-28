@@ -132,6 +132,41 @@ st.markdown(
 
         /* Reduce top page padding */
         .stMainBlockContainer { padding-top: 1rem; }
+
+        /* ---- Horizontal card carousel ---- */
+        /* Turn each 3-column card row into a horizontal scroller */
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        ) {
+            flex-wrap: nowrap !important;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(194, 105, 79, 0.3) transparent;
+        }
+        /* Each card takes ~75% of screen width so you can peek the next one */
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        ) > [data-testid="stColumn"] {
+            min-width: 75vw !important;
+            max-width: 75vw !important;
+            flex: 0 0 75vw !important;
+            scroll-snap-align: start;
+        }
+        /* Thin scrollbar for webkit browsers */
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        )::-webkit-scrollbar {
+            height: 4px;
+        }
+        [data-testid="stHorizontalBlock"]:has(
+            > [data-testid="stColumn"] [data-testid="stVerticalBlockBorderWrapper"]
+        )::-webkit-scrollbar-thumb {
+            background: rgba(194, 105, 79, 0.3);
+            border-radius: 2px;
+        }
     }
     </style>
     """,
