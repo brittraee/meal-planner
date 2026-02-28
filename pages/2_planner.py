@@ -7,6 +7,7 @@ import streamlit as st
 from src.database import (
     create_meal_plan,
     get_connection,
+    get_unique_proteins,
     get_unique_tags,
     get_user_settings,
     init_db,
@@ -98,22 +99,50 @@ with st.expander("Customize"):
     ) or []
 
     st.divider()
-    excl_col, incl_col = st.columns(2)
-    with excl_col:
-        excluded = st.text_input(
-            "Exclude ingredients",
-            placeholder="e.g. mushrooms, olives",
-        )
-    with incl_col:
-        included = st.text_input(
-            "Must include ingredients",
-            placeholder="e.g. chicken, rice",
-        )
-    require_included = st.toggle("Strict mode (only show exact matches)", value=False)
+    st.markdown(
+        "**Include / exclude ingredients** — "
+        "tap once to include, twice to exclude, again to clear"
+    )
+
+    # Build ingredient list from proteins + common staples
+    _proteins = get_unique_proteins(conn)
+    _staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
+                 "cheese", "tortilla", "noodles", "tofu"]
+    _selector_items = _proteins + [s for s in _staples if s not in _proteins]
+
+    # Tri-state: None → "include" → "exclude" → None
+    if "ing_states" not in st.session_state:
+        st.session_state.ing_states = {}
+
+    _cols = st.columns(5)
+    for _i, _ing in enumerate(_selector_items):
+        _state = st.session_state.ing_states.get(_ing)
+        if _state == "include":
+            _label = f"+ {_ing}"
+            _type = "primary"
+        elif _state == "exclude":
+            _label = f"× {_ing}"
+            _type = "secondary"
+        else:
+            _label = _ing
+            _type = "tertiary"
+
+        with _cols[_i % 5]:
+            if st.button(_label, key=f"ing_{_ing}", type=_type, use_container_width=True):
+                if _state is None:
+                    st.session_state.ing_states[_ing] = "include"
+                elif _state == "include":
+                    st.session_state.ing_states[_ing] = "exclude"
+                else:
+                    del st.session_state.ing_states[_ing]
+                st.rerun()
+
     seed = 0
 
-excluded_list = [x.strip() for x in excluded.split(",") if x.strip()] if excluded else None
-included_list = [x.strip() for x in included.split(",") if x.strip()] if included else None
+_ing_states = st.session_state.get("ing_states", {})
+included_list = [k for k, v in _ing_states.items() if v == "include"] or None
+excluded_list = [k for k, v in _ing_states.items() if v == "exclude"] or None
+require_included = bool(included_list)
 
 # --- Pinned recipes section ---
 pinned = st.session_state.get("pinned_recipes", {})
