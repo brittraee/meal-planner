@@ -17,7 +17,7 @@ st.set_page_config(
     page_title="Meal Planner",
     page_icon="\U0001f374",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 st.markdown(
@@ -48,6 +48,20 @@ st.markdown(
     }
     [data-testid="stSidebarNavItems"] li:nth-child(6) span[data-testid="stIconMaterial"] {
         color: #9B8F82;  /* Preferences — warm gray */
+    }
+
+    /* Auto-collapse sidebar on mobile */
+    @media (max-width: 768px) {
+        [data-testid="stSidebar"] {
+            min-width: 0 !important;
+            width: 0 !important;
+            transform: translateX(-100%);
+        }
+        [data-testid="stSidebar"][aria-expanded="true"] {
+            min-width: 245px !important;
+            width: 245px !important;
+            transform: translateX(0);
+        }
     }
     </style>""",
     unsafe_allow_html=True,

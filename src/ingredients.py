@@ -316,10 +316,19 @@ SECTION_MAP: dict[str, str] = {
     "half and half": "dairy",
 }
 
-# Common staples to pre-populate on first run
+# Common staples to pre-populate on first run (~20 items across categories)
 DEFAULT_PANTRY = [
-    "Salt", "Pepper", "Olive oil", "Butter", "Garlic powder",
-    "Onion powder", "Sugar", "Flour", "Vegetable oil",
+    # Oils & fats
+    "Olive oil", "Vegetable oil", "Butter",
+    # Seasonings
+    "Salt", "Pepper", "Garlic powder", "Onion powder",
+    "Cumin", "Paprika", "Italian seasoning", "Red pepper flakes",
+    # Baking
+    "Flour", "Sugar", "Brown sugar",
+    # Pantry staples
+    "Rice", "Pasta", "Soy sauce", "Chicken broth",
+    # Condiments
+    "Honey", "Ketchup",
 ]
 
 

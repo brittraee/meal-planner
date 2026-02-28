@@ -10,7 +10,7 @@ Built with Streamlit, SQLite, and Pandas.
 
 **Recipe Library** — 142 recipes, filterable by protein, cook time, and tags. Pin favorites to lock them into your next plan.
 
-**Meal Planner** — Generates 3-7 day dinner plans. Scores recipes based on pantry matches, preferred tags, and cook time, then shuffles with weighted randomness so you don't eat the same thing every week. Enforces protein variety (no chicken three nights in a row).
+**Meal Planner** — Generates 3-7 day dinner plans. Scores recipes based on pantry matches, preferred tags, and cook time, then uses weighted random selection so you get a different plan each time. Enforces protein variety (no chicken three nights in a row).
 
 **Shopping List** — Pulls ingredients from your plan, scales quantities by servings, groups by store section, and filters out anything already in your pantry.
 
@@ -36,10 +36,10 @@ Some specifics:
 
 ## How the planner scores recipes
 
-1. +3 for each ingredient you already have in your pantry
-2. +3 for included ingredients you asked for
-3. +2 for priority tags (like "quick" or "kid-friendly")
-4. +1 for quick/easy, +1 for kid-friendly
+1. +3 if the recipe uses ingredients already in your pantry
+2. +3 if the recipe contains an ingredient you asked for
+3. +1 for quick/easy, +1 for kid-friendly
+4. +2 for your priority tags (set in preferences)
 5. Weighted random selection — higher scores are more likely, but not guaranteed
 6. Greedy fill with protein-variety constraint
 

@@ -2,7 +2,16 @@
 
 import streamlit as st
 
-from src.database import get_connection, get_meal_plans, get_shopping_list, init_db
+from src.database import (
+    add_pantry_item,
+    delete_pantry_item,
+    get_connection,
+    get_meal_plans,
+    get_pantry_items,
+    get_shopping_list,
+    init_db,
+)
+from src.ingredients import get_ingredients_by_section, get_section, normalize
 from src.shopping import (
     SECTION_ORDER,
     format_shopping_json,
@@ -13,6 +22,12 @@ from src.shopping import (
 
 st.title("Shopping List")
 st.caption("Grouped by store section, pantry items filtered out.")
+
+st.page_link(
+    "pages/2_planner.py",
+    label="Back to Plan",
+    icon=":material/arrow_back:",
+)
 
 conn = get_connection()
 init_db(conn)
@@ -26,9 +41,51 @@ with st.sidebar:
     )
     st.page_link(
         "pages/4_pantry.py",
-        label="Manage Pantry",
+        label="Full Pantry Manager",
         icon=":material/grocery:",
     )
+
+
+# --- Inline pantry editor dialog ---
+@st.dialog("Quick Pantry Edit")
+def _pantry_editor():
+    """Add or remove pantry items without leaving the shopping list."""
+    items = get_pantry_items(conn)
+    current_names = {i["normalized_name"] for i in items}
+
+    # Show current pantry with remove buttons
+    if items:
+        st.markdown(f"**Your Pantry ({len(items)} items)**")
+        for item in items:
+            col_name, col_del = st.columns([4, 1])
+            with col_name:
+                st.caption(item["name"])
+            with col_del:
+                if st.button("\u00d7", key=f"pdel_{item['id']}"):
+                    delete_pantry_item(conn, item["id"])
+                    st.rerun()
+
+    # Quick add from common ingredients
+    st.divider()
+    st.markdown("**Add items**")
+    sections = get_ingredients_by_section()
+    for section, section_items in sections.items():
+        available = [i for i in section_items if normalize(i) not in current_names]
+        if available:
+            chosen = st.pills(
+                section,
+                options=available,
+                selection_mode="multi",
+                key=f"pdlg_{section}",
+            )
+            if chosen:
+                for name in chosen:
+                    add_pantry_item(conn, name, normalize(name), get_section(name))
+                st.rerun()
+
+# --- Quick pantry edit button ---
+if st.button("Edit Pantry", icon=":material/edit:", type="tertiary"):
+    _pantry_editor()
 
 # --- Select plan ---
 plans = get_meal_plans(conn)

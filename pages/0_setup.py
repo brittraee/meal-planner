@@ -4,6 +4,7 @@ import streamlit as st
 
 from src.database import (
     add_pantry_item,
+    delete_pantry_item,
     get_connection,
     get_pantry_items,
     init_db,
@@ -19,6 +20,45 @@ if not get_pantry_items(conn):
     for item in DEFAULT_PANTRY:
         add_pantry_item(conn, item, normalize(item), get_section(item))
 
+# ---------------------------------------------------------------------------
+# Welcome screen (shown before setup form)
+# ---------------------------------------------------------------------------
+if not st.session_state.get("show_setup_form"):
+    st.title("Welcome to Meal Planner")
+    st.markdown(
+        "Plan your week, shop smarter, waste less. "
+        "Here's what you can do:"
+    )
+
+    cols = st.columns(3)
+    with cols[0]:
+        st.markdown("#### Plan Meals")
+        st.caption(
+            "Generate a balanced week of dinners with protein variety, "
+            "tag priorities, and pinned favorites."
+        )
+    with cols[1]:
+        st.markdown("#### Smart Shopping")
+        st.caption(
+            "Auto-generated lists grouped by store section. "
+            "Pantry staples are filtered out so you only buy what you need."
+        )
+    with cols[2]:
+        st.markdown("#### Track Your Pantry")
+        st.caption(
+            "Mark what you keep on hand. Shopping lists "
+            "adjust automatically — no duplicates."
+        )
+
+    st.markdown("")
+    if st.button("Let's set up", type="primary", icon=":material/arrow_forward:"):
+        st.session_state.show_setup_form = True
+        st.rerun()
+    st.stop()
+
+# ---------------------------------------------------------------------------
+# Setup form
+# ---------------------------------------------------------------------------
 st.title("Get Started")
 st.caption("Set your defaults, then head to the Recipe Library.")
 
@@ -50,6 +90,22 @@ st.caption(
 items = get_pantry_items(conn)
 current_names = {i["normalized_name"] for i in items}
 
+# Show what's already in the pantry
+if items:
+    st.markdown("**Already added:**")
+    # Group by category for display
+    by_cat: dict[str, list[dict]] = {}
+    for item in items:
+        cat = item["category"] or "other"
+        by_cat.setdefault(cat, []).append(item)
+
+    for cat, cat_items in sorted(by_cat.items()):
+        names = ", ".join(i["name"] for i in cat_items)
+        st.caption(f"**{cat.title()}** — {names}")
+
+    st.markdown("")
+
+# Add more items via pills
 sections = get_ingredients_by_section()
 tabs = st.tabs(list(sections.keys()))
 
@@ -79,4 +135,5 @@ if pantry_count:
 st.divider()
 if st.button("Save & Start", type="primary", icon=":material/rocket_launch:"):
     save_user_settings(conn, servings, meals_per_week)
+    st.session_state.pop("show_setup_form", None)
     st.switch_page("pages/1_recipes.py")

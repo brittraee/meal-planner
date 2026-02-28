@@ -10,6 +10,7 @@ from src.database import (
     get_unique_tags,
     get_user_settings,
     init_db,
+    search_recipes,
 )
 from src.planner import generate_plan, pick_replacement
 
@@ -22,8 +23,37 @@ st.caption(
 conn = get_connection()
 init_db(conn)
 
-# --- Sidebar: workflow guide ---
+# --- Sidebar: recipe search + workflow guide ---
 with st.sidebar:
+    st.markdown("### Find & Pin Recipes")
+    _search_q = st.text_input(
+        "Search recipes",
+        placeholder="e.g. chicken, pasta",
+        key="planner_search",
+        label_visibility="collapsed",
+    )
+    if _search_q:
+        _results = search_recipes(conn, query=_search_q)
+        if _results:
+            for r in _results[:8]:
+                col_title, col_pin = st.columns([3, 1])
+                with col_title:
+                    st.caption(f"**{r['title']}** · {r['protein']}")
+                with col_pin:
+                    _pinned = st.session_state.get("pinned_recipes", {})
+                    if r["id"] not in _pinned:
+                        if st.button(
+                            "\U0001f4cc", key=f"sb_pin_{r['id']}",
+                            help=f"Pin {r['title']}",
+                        ):
+                            st.session_state.setdefault("pinned_recipes", {})[r["id"]] = r["title"]
+                            st.rerun()
+                    else:
+                        st.caption("\u2713")
+        else:
+            st.caption("No matches.")
+
+    st.divider()
     st.markdown("### Quick Start")
     st.caption(
         "Generate → swap any meal → adjust servings → save. "
@@ -31,7 +61,7 @@ with st.sidebar:
     )
     st.page_link(
         "pages/1_recipes.py",
-        label="Pin Recipes",
+        label="Browse Recipe Library",
         icon=":material/menu_book:",
     )
 
@@ -226,6 +256,14 @@ if "current_plan" in st.session_state:
             for _, row in plan_df.iterrows()
         ]
         create_meal_plan(conn, plan_name, str(plan_date), meals)
-        st.success(f"**{plan_name}** saved!")
+        st.session_state["plan_just_saved"] = True
         del st.session_state["current_plan"]
         st.rerun()
+
+    if st.session_state.pop("plan_just_saved", False):
+        st.success(f"Plan saved!")
+        st.page_link(
+            "pages/3_shopping.py",
+            label="View Shopping List",
+            icon=":material/shopping_cart:",
+        )

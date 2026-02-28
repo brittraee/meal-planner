@@ -96,8 +96,7 @@ if st.session_state.get("confirm_clear"):
             ):
                 clear_user_data(conn)
                 st.session_state.confirm_clear = False
-                st.toast("All user data cleared.")
-                st.rerun()
+                st.switch_page("pages/0_setup.py")
 
     _confirm_clear()
 
