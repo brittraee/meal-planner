@@ -121,7 +121,7 @@ st.markdown(
 
 st.title("Recipe Library")
 st.caption(
-    "Filter by protein, tags, or keyword. "
+    "Filter by protein, ingredient, tags, or keyword. "
     "Click a card for details, pin favorites for your meal plan."
 )
 
@@ -159,6 +159,19 @@ with tags_col:
 with search_col:
     search_text = st.text_input("Search", placeholder="e.g. pasta, taco...")
 
+# Ingredient filter pills
+_staples = ["rice", "pasta", "potato", "broccoli", "spinach", "mushroom",
+             "cheese", "tortilla", "noodles", "tofu"]
+_ing_options = proteins + [s for s in _staples if s not in proteins]
+selected_ingredients = st.pills(
+    "Filter by ingredient",
+    options=_ing_options,
+    selection_mode="multi",
+    format_func=str.title,
+    key="recipe_ingredient_pills",
+    label_visibility="collapsed",
+) or []
+
 max_time = time_values[selected_time]
 
 # --- Query recipes ---
@@ -168,6 +181,7 @@ results = search_recipes(
     tags=selected_tags or None,
     protein=selected_protein if selected_protein != "All" else None,
     max_time=max_time,
+    ingredients=selected_ingredients or None,
 )
 
 # --- Sidebar: pinned recipes + planner link ---
@@ -270,6 +284,8 @@ if selected_tags:
     active.append(f"Tags: {', '.join(selected_tags)}")
 if selected_time != "Any":
     active.append(f"Max: {selected_time}")
+if selected_ingredients:
+    active.append(f"Ingredients: {', '.join(i.title() for i in selected_ingredients)}")
 if search_text:
     active.append(f'"{search_text}"')
 if active:

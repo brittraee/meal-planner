@@ -242,6 +242,7 @@ def search_recipes(
     tags: list[str] | None = None,
     protein: str | None = None,
     max_time: int | None = None,
+    ingredients: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Search recipes with optional filters.
     """
@@ -282,6 +283,17 @@ def search_recipes(
             )
         """
         params.extend(time_tags)
+
+    if ingredients:
+        # Match recipes that use ANY of the selected ingredients
+        placeholders = ", ".join("?" for _ in ingredients)
+        sql += f"""
+            AND r.id IN (
+                SELECT ri2.recipe_id FROM recipe_ingredients ri2
+                WHERE ri2.normalized_name IN ({placeholders})
+            )
+        """
+        params.extend(ingredients)
 
     sql += " GROUP BY r.id ORDER BY r.title"
 

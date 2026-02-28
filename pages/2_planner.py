@@ -72,7 +72,15 @@ _default_servings = _settings["servings"] if _settings else 4
 
 # --- Inline plan settings ---
 
-num_days = st.slider("Meals to plan", min_value=3, max_value=7, value=_default_days)
+_plan_col, _serv_col = st.columns(2)
+with _plan_col:
+    num_days = st.number_input(
+        "Meals to plan", min_value=3, max_value=7, value=_default_days,
+    )
+with _serv_col:
+    _default_servings = st.number_input(
+        "Servings per meal", min_value=1, max_value=20, value=_default_servings,
+    )
 start_day = "Monday"  # kept for internal ordering, not shown to user
 
 _TAG_DISPLAY: dict[str, str] = {
