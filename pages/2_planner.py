@@ -88,13 +88,14 @@ with st.expander("Customize"):
             "whole30",
         }
     ]
-    st.markdown("**Prioritize tags** — checked tags score higher")
-    priority_tags = []
-    tag_cols = st.columns(4)
-    for i, tag in enumerate(lifestyle_tags):
-        with tag_cols[i % 4]:
-            if st.checkbox(tag, key=f"ptag_{tag}"):
-                priority_tags.append(tag)
+    st.markdown("**Prioritize tags** — selected tags score higher")
+    priority_tags = st.pills(
+        "Priority tags",
+        options=lifestyle_tags,
+        selection_mode="multi",
+        key="priority_tag_pills",
+        label_visibility="collapsed",
+    ) or []
 
     st.divider()
     excl_col, incl_col = st.columns(2)
