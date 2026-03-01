@@ -134,33 +134,16 @@ st.markdown(
         /* Reduce top page padding */
         .stMainBlockContainer { padding-top: 1rem; }
 
-        /* ---- Horizontal card carousel ---- */
-        /* Card rows live inside expanders — target column blocks there */
+        /* ---- Mobile card layout: full-width vertical list ---- */
         [data-testid="stExpander"] [data-testid="stHorizontalBlock"] {
-            flex-direction: row !important;
-            flex-wrap: nowrap !important;
-            overflow-x: auto !important;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            gap: 0.75rem !important;
-            padding-bottom: 0.5rem;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(194, 105, 79, 0.3) transparent;
+            flex-direction: column !important;
+            gap: 0.5rem !important;
         }
         [data-testid="stExpander"] [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
-            min-width: 75vw !important;
-            max-width: 75vw !important;
-            flex: 0 0 75vw !important;
-            width: 75vw !important;
-            scroll-snap-align: start;
-        }
-        /* Thin scrollbar for webkit browsers */
-        [data-testid="stExpander"] [data-testid="stHorizontalBlock"]::-webkit-scrollbar {
-            height: 4px;
-        }
-        [data-testid="stExpander"] [data-testid="stHorizontalBlock"]::-webkit-scrollbar-thumb {
-            background: rgba(194, 105, 79, 0.3);
-            border-radius: 2px;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
         }
     }
     </style>
