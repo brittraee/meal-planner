@@ -33,7 +33,7 @@ with st.sidebar:
         icon=":material/menu_book:",
     )
 
-tab_url, tab_manual = st.tabs(["Import from URL", "Manual Entry"])
+tab_url, tab_manual = st.tabs(["Import from URL (Beta)", "Manual Entry"])
 
 # ---- Tab 1: URL Import ----
 with tab_url:
@@ -77,8 +77,11 @@ with tab_url:
 
         # Tags
         existing_tags = get_unique_tags(conn)
+        scraped_tags = data.get("tags", [])
+        all_tag_options = sorted(set(existing_tags) | set(scraped_tags))
+        valid_defaults = [t for t in scraped_tags if t in all_tag_options]
         selected_tags = st.multiselect(
-            "Tags", existing_tags, default=data.get("tags", []), key="url_tags"
+            "Tags", all_tag_options, default=valid_defaults, key="url_tags"
         )
         new_tags = st.text_input("Additional tags (comma-separated)", key="url_new_tags")
         if new_tags:
