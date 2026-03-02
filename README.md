@@ -1,14 +1,24 @@
 # Meal Planner
 
-Weekly meal planning app built with Streamlit, SQLite, and Pandas. Generates dinner plans scored against pantry, builds grouped shopping lists, and handles recipe import from URLs with full ingredient normalization.
+Weekly meal planning app built with Streamlit, SQLite, and Pandas. Generates dinner plans scored against pantry, builds grouped shopping lists, and handles recipe import from URLs with ingredient normalization.
 
 **[Live Demo](https://meal-planner-bre2026.streamlit.app)**
 
+## Screenshots
+
+| Recipe Library | Meal Planner |
+|:-:|:-:|
+| ![Recipe Library](screenshots/01_recipe_library.png) | ![Meal Planner](screenshots/02_meal_planner.png) |
+
+| Pantry | Add Recipe |
+|:-:|:-:|
+| ![Pantry](screenshots/04_pantry.png) | ![Add Recipe](screenshots/05_add_recipe.png) |
+
 ## Features
 
-**Recipe Library** — 142 recipes, filterable by protein, cook time, and tags. Pin favorites to lock them into your next plan.
+**Recipe Library** — 142 recipes, filterable by protein, cook time, and tags. Pin favorites to add to the weekly meal planner.
 
-**Meal Planner** — Generates 3-7 day dinner plans. Scores recipes based on pantry matches, preferred tags, and cook time, then uses weighted random selection so you get a different plan each time. Enforces protein variety (no chicken three nights in a row).
+**Meal Planner** — Generates 2-7 day dinner plans. Scores recipes based on pantry matches, selected tags for cusine or cook time, then uses weighted random selection so you get a different plan each time. Enforces protein variety while prioritizing existing inventory (use up what we already have, but no chicken three nights in a row).
 
 **Shopping List** — Pulls ingredients from your plan, scales quantities by servings, groups by store section, and filters out anything already in your pantry.
 
@@ -19,17 +29,6 @@ Weekly meal planning app built with Streamlit, SQLite, and Pandas. Generates din
 Recipe sites format ingredients inconsistently — unicode fractions, embedded brand names, metric/imperial mixing, prep instructions stuffed into the name. The normalization scripts (`src/scraper.py`, `src/ingredients.py`) handle parsing and are included so the pipeline stays consistent as recipes are added.
 
 `ingredients.py` maintains a section map (~200 ingredients → store sections) and an alias table for common variants.
-
-## How plan generation works
-
-Recipes are scored based on what you have and what you like, then selected using weighted randomness so plans vary each time:
-
-- +3 if you already have ingredients in your pantry
-- +3 if the recipe matches an ingredient you requested
-- +1 for quick/easy, +1 for kid-friendly
-- +2 for your priority tags
-
-Higher-scoring recipes are more likely to appear, but not guaranteed. The planner also avoids repeating the same protein on consecutive nights.
 
 ## Tech
 
@@ -76,7 +75,7 @@ streamlit run app.py
 
 [Brittney Erler-Rajek](https://github.com/brittraee)
 
-AI-Disclosure: Self taught developer utilizing Claude Code (Opus 4.6) for boilerplate code gen, documentation lookup, brainstorming and learning.
+AI-Disclosure: Utilizing Claude Code (Opus 4.6) for planning, debugging, and documentation lookups.
 
 ## License
 

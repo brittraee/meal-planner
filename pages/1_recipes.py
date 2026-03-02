@@ -439,38 +439,34 @@ if results:
                                     st.session_state.pinned_recipes[recipe_id] = recipe["title"]
                                 st.rerun()
 
-                # --- Inline detail panel (below the row containing the clicked card) ---
-                for recipe in row_recipes:
-                    if st.session_state.get("viewing_recipe") == recipe["id"]:
-                        details = get_recipe_details(conn, recipe["id"])
-                        if details:
-                            with st.container(border=True):
-                                info_col, ing_col = st.columns(2)
-                                with info_col:
-                                    st.markdown(f"**Protein:** {details['protein']}")
-                                    st.markdown(f"**Servings:** {details.get('servings') or 4}")
-                                    if details.get("tags"):
-                                        tag_html = " ".join(
-                                            f"<span>{t}</span>"
-                                            for t in details["tags"]
+                        # --- Detail panel (inline, inside the card) ---
+                        if is_viewing:
+                            details = get_recipe_details(conn, recipe_id)
+                            if details:
+                                st.divider()
+                                st.markdown(f"**Protein:** {details['protein']}")
+                                st.markdown(f"**Servings:** {details.get('servings') or 4}")
+                                if details.get("tags"):
+                                    tag_html = " ".join(
+                                        f"<span>{t}</span>"
+                                        for t in details["tags"]
+                                    )
+                                    st.markdown(
+                                        f'<div class="recipe-tags">{tag_html}</div>',
+                                        unsafe_allow_html=True,
+                                    )
+                                lines = []
+                                for ing in details["ingredients"]:
+                                    optional = " *(optional)*" if ing["is_optional"] else ""
+                                    if ing.get("qty"):
+                                        qs = format_qty(ing["qty"])
+                                        unit = f" {ing['unit']}" if ing.get("unit") else ""
+                                        lines.append(
+                                            f"- {qs}{unit} {ing['normalized_name']}{optional}"
                                         )
-                                        st.markdown(
-                                            f'<div class="recipe-tags">{tag_html}</div>',
-                                            unsafe_allow_html=True,
-                                        )
-                                with ing_col:
-                                    lines = []
-                                    for ing in details["ingredients"]:
-                                        optional = " *(optional)*" if ing["is_optional"] else ""
-                                        if ing.get("qty"):
-                                            qs = format_qty(ing["qty"])
-                                            unit = f" {ing['unit']}" if ing.get("unit") else ""
-                                            lines.append(
-                                                f"- {qs}{unit} {ing['normalized_name']}{optional}"
-                                            )
-                                        else:
-                                            lines.append(f"- {ing['normalized_name']}{optional}")
-                                    st.markdown("**Ingredients:**\n" + "\n".join(lines))
+                                    else:
+                                        lines.append(f"- {ing['normalized_name']}{optional}")
+                                st.markdown("**Ingredients:**\n" + "\n".join(lines))
 
 else:
     st.info("No recipes match the current filters.")
