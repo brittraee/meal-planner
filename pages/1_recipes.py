@@ -153,8 +153,12 @@ st.markdown(
 
 st.title("Recipe Library")
 st.caption(
-    "Filter by ingredient, tags, or keyword. "
-    "Click a card for details, pin favorites for your meal plan."
+    "Pin favorites for this week, or head straight to the planner for a randomized selection."
+)
+st.page_link(
+    "pages/2_planner.py",
+    label="Continue to Meal Planner",
+    icon=":material/arrow_forward:",
 )
 
 conn = get_connection()
