@@ -131,7 +131,7 @@ _INSTRUCTION_BOILERPLATE = {
 
 
 def _extract_instructions(lines: list[str]) -> str:
-    """Extract instructions text after **Instructions:** until end of file."""
+    """Pull instructions from the **Instructions:** section."""
     in_section = False
     instruction_lines: list[str] = []
 

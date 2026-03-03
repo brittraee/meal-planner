@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Backfill recipe instructions by scraping source URLs.
-
-Reads recipe_urls.json, scrapes each URL for instructions, and appends
-an **Instructions:** section to markdown files that don't already have one.
+"""Scrape source URLs and append instructions to markdown files.
 
 Usage:
     python scripts/backfill_instructions.py
@@ -28,7 +25,7 @@ LOG_FILE = Path(__file__).parent.parent / "data" / "instruction_backfill_log.jso
 
 
 def load_urls() -> dict[str, str]:
-    """Load recipe_id -> URL mapping."""
+    """Load recipe_id → URL mapping."""
     if not URL_FILE.exists():
         print(f"Error: {URL_FILE} not found")
         sys.exit(1)
@@ -37,20 +34,20 @@ def load_urls() -> dict[str, str]:
 
 
 def has_instructions(path: Path) -> bool:
-    """Check if a markdown file already has an **Instructions:** section."""
+    """Check if the markdown already has instructions."""
     text = path.read_text(encoding="utf-8")
     return bool(re.search(r"\*\*Instructions:?\*\*", text))
 
 
 def append_instructions(path: Path, instructions: str, url: str) -> None:
-    """Append an **Instructions:** section to a markdown file."""
+    """Append instructions to a markdown file."""
     text = path.read_text(encoding="utf-8").rstrip()
     text += f"\n\n**Instructions:**  \n{instructions}\n"
     path.write_text(text, encoding="utf-8")
 
 
 def backfill_recipe(recipe_id: str, url: str, dry_run: bool = False) -> dict:
-    """Scrape instructions from a URL and append to the markdown file."""
+    """Scrape instructions from a URL and write to markdown."""
     result = {"recipe_id": recipe_id, "url": url, "status": "ok", "details": ""}
 
     md_path = MEALS_DIR / f"{recipe_id}.md"
@@ -126,11 +123,11 @@ def main():
         else:
             print(f"    x {result['status']}: {result['details']}")
 
-        # Rate limit: 1 second between scrape requests (skip for already-skipped)
+        # Rate limit between requests
         if result["status"] not in ("skipped",) and i < total:
             time.sleep(1)
 
-    # Save log
+    # Log results
     with open(LOG_FILE, "w") as f:
         json.dump(results, f, indent=2)
 

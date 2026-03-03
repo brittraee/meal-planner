@@ -120,11 +120,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
 
 
 def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
-    """Insert a Recipe object into the database.
-
-    Uses INSERT OR REPLACE to support re-importing.  Markdown files are
-    the source of truth for ingredient names — always refreshes them.
-    """
+    """Insert or replace a recipe. Always refreshes ingredients from markdown."""
     with conn:
         conn.execute(
             """INSERT OR REPLACE INTO recipes
