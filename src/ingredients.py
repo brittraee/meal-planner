@@ -29,6 +29,7 @@ _IRREGULAR_PLURALS: dict[str, str] = {
 
 # Alias map: variant -> canonical name
 ALIASES: dict[str, str] = {
+    "chicken": "chicken breast",
     "chicken breasts": "chicken breast",
     "chicken thighs": "chicken thigh",
     "bell peppers": "bell pepper",
@@ -120,7 +121,6 @@ SECTION_MAP: dict[str, str] = {
     # Protein
     "chicken breast": "protein",
     "chicken thigh": "protein",
-    "chicken": "protein",
     "steak": "protein",
     "ground beef": "protein",
     "ground turkey": "protein",

@@ -86,7 +86,7 @@ class TestParseIngredientLine:
         qty, unit, name = parse_ingredient_line("1\u00bd lbs chicken")
         assert qty == 1.5
         assert unit == "lb"
-        assert name == "chicken"
+        assert name == "chicken breast"
 
     def test_pricing_stripped(self):
         qty, unit, name = parse_ingredient_line("\u00bc cup olive oil ($0.88)")
@@ -98,7 +98,7 @@ class TestParseIngredientLine:
         qty, unit, name = parse_ingredient_line("1 kg / 2 lb chicken")
         assert qty == 2.0
         assert unit == "lb"
-        assert name == "chicken"
+        assert name == "chicken breast"
 
     def test_metric_conversion_grams(self):
         qty, unit, name = parse_ingredient_line("400 g spaghetti")

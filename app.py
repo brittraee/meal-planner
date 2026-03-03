@@ -3,6 +3,7 @@
 import streamlit as st
 
 from src.database import (
+    clear_user_data,
     get_connection,
     get_pantry_items,
     get_user_settings,
@@ -56,6 +57,11 @@ st.markdown(
 
 conn = get_connection()
 init_db(conn)
+
+# New session: clear stale user data so each visitor starts fresh
+if "_session_init" not in st.session_state:
+    st.session_state._session_init = True
+    clear_user_data(conn)
 
 # ---------------------------------------------------------------------------
 # Navigation
