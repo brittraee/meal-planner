@@ -7,7 +7,7 @@ import re
 from fractions import Fraction
 from typing import Any
 
-import requests
+import cloudscraper
 from recipe_scrapers import scrape_html
 
 from src.ingredients import normalize
@@ -306,8 +306,9 @@ def _slugify(title: str) -> str:
 
 
 def _fetch_html(url: str) -> str:
-    """Fetch HTML from a URL with a browser-like user agent."""
-    resp = requests.get(url, headers={"User-Agent": _USER_AGENT}, timeout=15)
+    """Fetch HTML from a URL with anti-bot handling."""
+    scraper = cloudscraper.create_scraper()
+    resp = scraper.get(url, timeout=15)
     resp.raise_for_status()
     return resp.text
 

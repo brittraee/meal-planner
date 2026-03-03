@@ -10,6 +10,7 @@ dependencies = [
     "streamlit>=1.40.0",
     "pandas>=2.2.0",
     "requests>=2.32.0",
+    "cloudscraper>=1.2.71",
     "recipe-scrapers>=15.0.0",
 ]
 

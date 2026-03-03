@@ -32,7 +32,7 @@ Recipe sites format ingredients inconsistently — unicode fractions, embedded b
 
 ## Tech
 
-**Stack:** Streamlit, SQLite (7 tables), Pandas, recipe-scrapers, TheMealDB API, Material Icons, custom CSS
+**Stack:** Streamlit, SQLite (7 tables), Pandas, recipe-scrapers, cloudscraper, TheMealDB API, Material Icons, custom CSS
 
 **Dev tools:** pytest (146 tests), Ruff, Claude Code (Opus/Sonnet 4.6)
 
@@ -62,7 +62,7 @@ data/meals.db           # SQLite database
 
 ## Run locally
 
-Only four dependencies: `streamlit`, `pandas`, `requests`, `recipe-scrapers`.
+Only five dependencies: `streamlit`, `pandas`, `cloudscraper`, `recipe-scrapers`, `requests`.
 
 ```bash
 git clone https://github.com/brittraee/meal-planner.git && cd meal-planner
