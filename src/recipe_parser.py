@@ -28,6 +28,7 @@ def parse_recipe(path: Path) -> Recipe:
     ingredients = _extract_ingredients(lines)
     prep = _extract_prep(lines)
     tags = _extract_tags(lines)
+    instructions = _extract_instructions(lines)
 
     return Recipe(
         title=title,
@@ -35,6 +36,7 @@ def parse_recipe(path: Path) -> Recipe:
         ingredients=tuple(ingredients),
         prep=prep,
         tags=frozenset(tags),
+        instructions=instructions,
     )
 
 
@@ -119,3 +121,34 @@ def _extract_tags(lines: list[str]) -> set[str]:
             # Find all #word patterns
             return {m.group(1) for m in re.finditer(r"#(\w+)", stripped)}
     return set()
+
+
+_INSTRUCTION_BOILERPLATE = {
+    "did you love this recipe",
+    "leftovers!",
+    "let us know with a rating",
+}
+
+
+def _extract_instructions(lines: list[str]) -> str:
+    """Extract instructions text after **Instructions:** until end of file."""
+    in_section = False
+    instruction_lines: list[str] = []
+
+    for line in lines:
+        stripped = line.strip()
+
+        if "**Instructions:**" in stripped or "**Instructions**" in stripped:
+            in_section = True
+            after = re.sub(r"\*\*Instructions:?\*\*\s*", "", stripped).strip()
+            if after:
+                instruction_lines.append(after)
+            continue
+
+        if in_section:
+            if any(stripped.lower().startswith(b) for b in _INSTRUCTION_BOILERPLATE):
+                break
+            instruction_lines.append(line.rstrip())
+
+    result = "\n".join(instruction_lines).strip()
+    return result

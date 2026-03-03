@@ -467,6 +467,15 @@ if results:
                                     else:
                                         lines.append(f"- {ing['normalized_name']}{optional}")
                                 st.markdown("**Ingredients:**\n" + "\n".join(lines))
+                                if details.get("instructions"):
+                                    with st.expander("Instructions", expanded=False):
+                                        st.markdown(details["instructions"])
+                                if details.get("source_url"):
+                                    st.link_button(
+                                        "View original recipe",
+                                        details["source_url"],
+                                        icon=":material/open_in_new:",
+                                    )
 
 else:
     st.info("No recipes match the current filters.")

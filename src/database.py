@@ -133,14 +133,16 @@ def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
         ).fetchone()
 
         conn.execute(
-            """INSERT OR REPLACE INTO recipes (id, title, prep_notes, source_file, protein)
-               VALUES (?, ?, ?, ?, ?)""",
+            """INSERT OR REPLACE INTO recipes
+               (id, title, prep_notes, source_file, protein, instructions)
+               VALUES (?, ?, ?, ?, ?, ?)""",
             (
                 recipe.filename,
                 recipe.title,
                 recipe.prep,
                 recipe.filename,
                 recipe.protein.value,
+                recipe.instructions,
             ),
         )
 

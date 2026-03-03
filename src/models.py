@@ -71,6 +71,7 @@ class Recipe:
     ingredients: tuple[Ingredient, ...]
     prep: str
     tags: frozenset[str]
+    instructions: str = ""
 
     @property
     def protein(self) -> Protein:
