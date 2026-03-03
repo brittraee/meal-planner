@@ -34,7 +34,7 @@ Recipe sites format ingredients inconsistently — unicode fractions, embedded b
 
 **Stack:** Streamlit, SQLite (7 tables), Pandas, recipe-scrapers, cloudscraper, TheMealDB API, Material Icons, custom CSS
 
-**Dev tools:** pytest (146 tests), Ruff, Claude Code (Opus/Sonnet 4.6)
+**Dev tools:** pytest (146 tests), Ruff
 
 ## Project structure
 
@@ -74,8 +74,6 @@ streamlit run app.py
 ## Built by
 
 [Brittney Erler-Rajek](https://github.com/brittraee)
-
-AI-Disclosure: Utilizing Claude Code (Opus 4.6) for planning, debugging, and documentation lookups.
 
 ## License
 
