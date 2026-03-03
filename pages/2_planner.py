@@ -238,54 +238,40 @@ if "current_plan" in st.session_state:
     st.divider()
     st.subheader("Your Meal Plan")
 
-    # Column headers
-    header = st.columns([1.5, 3, 1.5, 2.5, 2.5, 1.2, 0.8])
-    header[0].markdown("**#**")
-    header[1].markdown("**Recipe**")
-    header[2].markdown("**Protein**")
-    header[3].markdown("\U0001f3ea **Pantry**")
-    header[4].markdown("\U0001f3f7\ufe0f **Tags**")
-    header[5].markdown("**Servings**")
-    header[6].markdown("")
-
-    # Display table with scoring evidence inline
     for idx, row in plan_df.iterrows():
-        cols = st.columns([1.5, 3, 1.5, 2.5, 2.5, 1.2, 0.8])
-        with cols[0]:
-            st.markdown(f"**Meal {idx + 1}**")
-        with cols[1]:
-            st.markdown(row["title"])
-        with cols[2]:
-            st.markdown(f"_{row['protein']}_")
-        with cols[3]:
+        with st.container(border=True):
+            st.markdown(f"**Meal {idx + 1}: {row['title']}**")
+            meta = f"_{row['protein']}_"
             pantry = row.get("pantry_matches", "")
             if pantry:
-                st.caption(pantry)
-        with cols[4]:
+                meta += f" · {pantry}"
             tags = row.get("tag_bonuses", "")
             if tags and tags not in ("pinned", "swapped"):
-                st.caption(tags)
+                meta += f" · {tags}"
             elif tags == "pinned":
-                st.caption("\U0001f4cc pinned")
+                meta += " · pinned"
             elif tags == "swapped":
-                st.caption("\U0001f500 swapped")
-        with cols[5]:
-            new_servings = st.number_input(
-                "Servings",
-                min_value=1,
-                max_value=20,
-                value=int(row["servings"]),
-                key=f"servings_{idx}",
-                label_visibility="collapsed",
-            )
-            plan_df.at[idx, "servings"] = new_servings
-        with cols[6]:
-            if st.button("\U0001f500", key=f"swap_{idx}"):
-                replacement = pick_replacement(conn, plan_df, idx)
-                for col in replacement:
-                    plan_df.at[idx, col] = replacement[col]
-                st.session_state["current_plan"] = plan_df
-                st.rerun()
+                meta += " · swapped"
+            st.caption(meta)
+
+            serv_col, swap_col = st.columns([3, 1])
+            with serv_col:
+                new_servings = st.number_input(
+                    "Servings",
+                    min_value=1,
+                    max_value=20,
+                    value=int(row["servings"]),
+                    key=f"servings_{idx}",
+                    label_visibility="collapsed",
+                )
+                plan_df.at[idx, "servings"] = new_servings
+            with swap_col:
+                if st.button("Swap", key=f"swap_{idx}", use_container_width=True):
+                    replacement = pick_replacement(conn, plan_df, idx)
+                    for col in replacement:
+                        plan_df.at[idx, col] = replacement[col]
+                    st.session_state["current_plan"] = plan_df
+                    st.rerun()
 
     # --- Save & continue ---
     st.divider()
