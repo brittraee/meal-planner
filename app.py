@@ -109,4 +109,9 @@ if settings:
         f"**{len(pantry)}** pantry items"
     )
 
+st.sidebar.markdown("---")
+st.sidebar.caption(
+    "Built by [Brittney Erler-Rajek](https://github.com/brittraee)"
+)
+
 pg.run()

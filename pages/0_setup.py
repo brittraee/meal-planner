@@ -19,11 +19,8 @@ init_db(conn)
 # Welcome screen (shown before setup form)
 # ---------------------------------------------------------------------------
 if not st.session_state.get("show_setup_form"):
-    st.title("Welcome to Meal Planner")
-    st.markdown(
-        "Plan your week, shop smarter, waste less. "
-        "Here's what you can do:"
-    )
+    st.title("Welcome! Ready to plan some meals?")
+    st.markdown("Here's what you can do:")
 
     cols = st.columns(3)
     with cols[0]:
