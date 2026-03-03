@@ -194,7 +194,16 @@ else:
     st.caption("No pinned recipes — the planner will pick for you.")
 
 # --- Generate plan ---
-if st.button("Generate Plan", type="secondary", use_container_width=True):
+gen_col, clear_col = st.columns([3, 1])
+with gen_col:
+    _generate = st.button("Generate Plan", type="secondary", use_container_width=True)
+with clear_col:
+    if st.button("Start Fresh", use_container_width=True):
+        for key in ["current_plan", "pinned_recipes", "checked_items", "checked_plan_id"]:
+            st.session_state.pop(key, None)
+        st.rerun()
+
+if _generate:
     try:
         plan_df = generate_plan(
             conn,

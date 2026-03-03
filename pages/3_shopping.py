@@ -87,6 +87,8 @@ if st.button("Edit Pantry", icon=":material/edit:", type="tertiary"):
 # --- Select plan ---
 plans = get_meal_plans(conn)
 if not plans:
+    for key in ["checked_items", "checked_plan_id"]:
+        st.session_state.pop(key, None)
     st.info(
         "No meal plans saved yet. Head to the **Meal Planner** to generate "
         "and save a plan — your shopping list will appear here."
