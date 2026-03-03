@@ -8,6 +8,7 @@ from src.constants import PROTEIN_SUBS, TAG_DISPLAY
 from src.database import (
     create_meal_plan,
     get_connection,
+    get_meal_plans,
     get_unique_proteins,
     get_unique_tags,
     get_user_settings,
@@ -221,6 +222,14 @@ if _generate:
         st.session_state.pinned_recipes = {}
     except ValueError as e:
         st.error(str(e))
+
+# Auto-generate on first visit (no plan yet, no saved plans)
+if "current_plan" not in st.session_state and not get_meal_plans(conn):
+    try:
+        plan_df = generate_plan(conn, days=num_days, start_day=start_day)
+        st.session_state["current_plan"] = plan_df
+    except ValueError:
+        pass
 
 # --- Display plan ---
 if "current_plan" in st.session_state:
