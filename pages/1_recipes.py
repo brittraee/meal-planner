@@ -355,7 +355,7 @@ pinned = st.session_state.pinned_recipes
 # Check if recipes exist
 all_recipes = search_recipes(conn)
 if not all_recipes:
-    st.warning("No recipes found. Add recipes via the Add Recipe page.")
+    st.warning("No recipes found. Use the **Add Recipe** button above to get started.")
     st.stop()
 
 # --- Filter bar ---

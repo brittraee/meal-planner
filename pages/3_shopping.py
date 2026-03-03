@@ -39,8 +39,8 @@ with st.sidebar:
         "Pantry items are already filtered out."
     )
     st.page_link(
-        "pages/4_pantry.py",
-        label="Full Pantry Manager",
+        "pages/7_preferences.py",
+        label="Manage Pantry",
         icon=":material/grocery:",
     )
 

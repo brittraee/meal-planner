@@ -29,26 +29,20 @@ st.markdown(
         font-family: 'DM Sans', sans-serif;
     }
 
-    a.stHeaderLink { display: none !important; }
+    [data-testid="stHeaderActionElements"] { display: none !important; }
 
     /* Colored sidebar nav icons */
     [data-testid="stSidebarNavItems"] li:nth-child(1) span[data-testid="stIconMaterial"] {
-        color: #C2694F;  /* Recipe Library — terracotta */
+        color: #C2694F;  /* Recipe Library */
     }
     [data-testid="stSidebarNavItems"] li:nth-child(2) span[data-testid="stIconMaterial"] {
-        color: #7D9B76;  /* Meal Planner — dusty sage */
+        color: #7D9B76;  /* Meal Planner */
     }
     [data-testid="stSidebarNavItems"] li:nth-child(3) span[data-testid="stIconMaterial"] {
-        color: #8B8B3A;  /* Shopping List — olive */
+        color: #8B8B3A;  /* Shopping List */
     }
     [data-testid="stSidebarNavItems"] li:nth-child(4) span[data-testid="stIconMaterial"] {
-        color: #D4956A;  /* Pantry — warm copper */
-    }
-    [data-testid="stSidebarNavItems"] li:nth-child(5) span[data-testid="stIconMaterial"] {
-        color: #7D9B76;  /* Add Recipe — sage */
-    }
-    [data-testid="stSidebarNavItems"] li:nth-child(6) span[data-testid="stIconMaterial"] {
-        color: #9B8F82;  /* Preferences — warm gray */
+        color: #9B8F82;  /* Preferences */
     }
 
     </style>""",
@@ -78,9 +72,7 @@ plan_pages = [
     st.Page("pages/3_shopping.py", title="Shopping List", icon=":material/shopping_cart:"),
 ]
 manage_pages = [
-    st.Page("pages/4_pantry.py", title="Pantry", icon=":material/kitchen:"),
-    st.Page("pages/6_add_recipe.py", title="Add Recipe", icon=":material/add_circle:"),
-    st.Page("pages/7_preferences.py", title="Meal Preferences", icon=":material/tune:"),
+    st.Page("pages/7_preferences.py", title="Preferences", icon=":material/tune:"),
 ]
 
 nav: dict[str, list] = {}
