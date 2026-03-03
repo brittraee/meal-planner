@@ -14,3 +14,8 @@ Layer deli meats and provolone on sub rolls, top with lettuce, tomato, onion, an
 **Tags:** #pork #italian #quick #30min
 
 **Prep Time:** 10 min | **Total Time:** 10 min
+
+**Instructions:**  
+Open sub rolls and lightly toast if desired. Spread with mayonnaise.
+Layer cheeses, meats, lettuce, onion and tomatoes on the rolls.
+Drizzle with Italian vinaigrette and peppers.
