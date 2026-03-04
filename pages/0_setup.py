@@ -41,4 +41,4 @@ if st.button("Plan my meals", type="primary", icon=":material/arrow_forward:"):
     save_user_settings(conn, 4, 5)
     for name in DEFAULT_PANTRY:
         add_pantry_item(conn, name, normalize(name), get_section(name))
-    st.switch_page("pages/2_planner.py")
+    st.switch_page("pages/7_preferences.py")
