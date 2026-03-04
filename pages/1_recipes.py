@@ -160,7 +160,7 @@ conn = get_connection()
 init_db(conn)
 
 st.title("Recipe Library")
-st.caption(
+st.markdown(
     "Pin favorites for this week, or head straight to the planner for a randomized selection."
 )
 

@@ -18,7 +18,7 @@ conn = get_connection()
 init_db(conn)
 
 st.title("Preferences")
-st.caption("Adjust your defaults and manage your pantry.")
+st.markdown("Adjust your defaults and manage your pantry.")
 
 settings = get_user_settings(conn)
 current_servings = settings["servings"] if settings else 4

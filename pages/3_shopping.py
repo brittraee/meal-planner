@@ -20,7 +20,7 @@ from src.shopping import (
 from src.units import format_qty
 
 st.title("Shopping List")
-st.caption("Grouped by store section, pantry items filtered out.")
+st.markdown("Grouped by store section, pantry items filtered out.")
 
 st.page_link(
     "pages/2_planner.py",

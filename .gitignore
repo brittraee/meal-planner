@@ -13,13 +13,18 @@ venv/
 output/
 # data/*.db
 data/backfill_log.json
+data/instruction_backfill_log.json
 .env
 *.DS_Store
+.vscode/
+uv.lock
 
 # AI assistant context
 .claude/
 CLAUDE.md
 AGENTS.md
+docs/plans/
+scripts/test_urls.py
 
 # Obsidian artifacts
 _INDEX.md

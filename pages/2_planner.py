@@ -18,7 +18,7 @@ from src.database import (
 from src.planner import generate_plan, pick_replacement
 
 st.title("Meal Planner")
-st.caption(
+st.markdown(
     "Generate a balanced week of dinners. "
     "Pin favorites or let the planner choose."
 )
