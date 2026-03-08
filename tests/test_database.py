@@ -353,3 +353,110 @@ class TestClearUserData:
 
         recipes = get_all_recipes(db_with_recipes)
         assert len(recipes) == 7  # all sample recipes still there
+
+
+class TestQtyDefaults:
+    def test_insert_recipe_applies_defaults(self, db, sample_recipe):
+        """Fresh insert_recipe should populate qty/unit from defaults."""
+        insert_recipe(db, sample_recipe)
+        db.commit()
+        details = get_recipe_details(db, sample_recipe.filename)
+        # chicken breast has a default (0.375 lb/serving * 4 = 1.5 lb)
+        chicken = next(
+            i for i in details["ingredients"]
+            if i["normalized_name"] == "chicken breast"
+        )
+        assert chicken["qty"] == 1.5
+        assert chicken["unit"] == "lb"
+
+    def test_insert_recipe_sets_qty_source_default(self, db, sample_recipe):
+        insert_recipe(db, sample_recipe)
+        db.commit()
+        row = db.execute(
+            "SELECT qty_source FROM recipe_ingredients "
+            "WHERE recipe_id = ? AND normalized_name = 'chicken breast'",
+            (sample_recipe.filename,),
+        ).fetchone()
+        assert row["qty_source"] == "default"
+
+    def test_insert_recipe_preserves_scraped_qty(self, db, sample_recipe):
+        """Re-importing a recipe preserves scraped qty data."""
+        insert_recipe(db, sample_recipe)
+        db.commit()
+        # Simulate scraping by manually setting qty_source
+        db.execute(
+            "UPDATE recipe_ingredients SET qty = 2.0, unit = 'lb', qty_source = 'scraped' "
+            "WHERE recipe_id = ? AND normalized_name = 'chicken breast'",
+            (sample_recipe.filename,),
+        )
+        db.commit()
+        # Re-import
+        insert_recipe(db, sample_recipe)
+        db.commit()
+        row = db.execute(
+            "SELECT qty, unit, qty_source FROM recipe_ingredients "
+            "WHERE recipe_id = ? AND normalized_name = 'chicken breast'",
+            (sample_recipe.filename,),
+        ).fetchone()
+        assert row["qty"] == 2.0
+        assert row["unit"] == "lb"
+        assert row["qty_source"] == "scraped"
+
+    def test_unknown_ingredient_gets_null_qty(self, db):
+        """Ingredients not in defaults get NULL qty."""
+        from src.models import Ingredient, Recipe
+
+        recipe = Recipe(
+            title="Mystery Meal",
+            filename="99_Mystery",
+            ingredients=(Ingredient(name="unicorn tears"),),
+            prep="Wave wand.",
+            tags=frozenset({"fantasy"}),
+        )
+        insert_recipe(db, recipe)
+        db.commit()
+        row = db.execute(
+            "SELECT qty, unit, qty_source FROM recipe_ingredients "
+            "WHERE recipe_id = '99_Mystery'",
+        ).fetchone()
+        assert row["qty"] is None
+        assert row["qty_source"] is None
+
+    def test_insert_recipe_dict_sets_scraped_source(self, db):
+        """insert_recipe_dict with mealdb source_type sets qty_source='scraped'."""
+        data = {
+            "id": "mealdb_test",
+            "title": "Test Recipe",
+            "protein": "chicken",
+            "servings": 4,
+            "source_type": "mealdb",
+            "ingredients": [
+                {"name": "chicken breast", "qty": 2.0, "unit": "lb"},
+            ],
+            "tags": [],
+        }
+        insert_recipe_dict(db, data)
+        db.commit()
+        row = db.execute(
+            "SELECT qty_source FROM recipe_ingredients WHERE recipe_id = 'mealdb_test'",
+        ).fetchone()
+        assert row["qty_source"] == "scraped"
+
+    def test_insert_recipe_dict_null_qty_no_source(self, db):
+        """Ingredients without qty get NULL qty_source regardless of source_type."""
+        data = {
+            "id": "manual_test",
+            "title": "Manual Recipe",
+            "protein": "chicken",
+            "source_type": "manual",
+            "ingredients": [
+                {"name": "garlic", "qty": None, "unit": None},
+            ],
+            "tags": [],
+        }
+        insert_recipe_dict(db, data)
+        db.commit()
+        row = db.execute(
+            "SELECT qty_source FROM recipe_ingredients WHERE recipe_id = 'manual_test'",
+        ).fetchone()
+        assert row["qty_source"] is None

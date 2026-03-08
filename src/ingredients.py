@@ -114,6 +114,111 @@ ALIASES: dict[str, str] = {
     "all-purpose flour": "flour",
     "all purpose flour": "flour",
     "ap flour": "flour",
+    # Cheese variants
+    "shredded cheese": "cheese",
+    "shredded cheddar": "cheddar cheese",
+    "provolone cheese": "cheese",
+    "mozzarella cheese": "mozzarella",
+    "american cheese": "cheese",
+    "cheese slices": "cheese",
+    "feta": "feta cheese",
+    # Produce variants
+    "red onions": "onion",
+    "shallots": "shallot",
+    "yellow pepper": "bell pepper",
+    "red pepper": "bell pepper",
+    "green bell pepper": "bell pepper",
+    "courgettes": "zucchini",
+    "aubergine": "eggplant",
+    "baby potatoes": "potato",
+    "basil leaves": "fresh basil",
+    "broccoli florets": "broccoli",
+    "cucumbers": "cucumber",
+    "apples": "apple",
+    # Oil variants
+    "sesame seed oil": "sesame oil",
+    "sunflower oil": "vegetable oil",
+    "canola oil": "vegetable oil",
+    # Protein variants
+    "shredded pork": "pork",
+    "cooked chicken": "chicken breast",
+    "cooked steak": "steak",
+    "sirloin steak": "steak",
+    "beef fillet": "steak",
+    "beef brisket": "steak",
+    "chicken drumsticks": "chicken thigh",
+    "cod fillet": "cod",
+    "cod fillets": "cod",
+    "breakfast sausage": "sausage",
+    "cooked meatballs": "meatballs",
+    "chorizo": "sausage",
+    # Herb/spice variants
+    "coriander": "cilantro",
+    "smoked paprika": "paprika",
+    "cayenne pepper": "chili powder",
+    "ground ginger": "ginger",
+    "red chilli": "red pepper flakes",
+    "red chilli flakes": "red pepper flakes",
+    "chilli flakes": "red pepper flakes",
+    "chilli powder": "chili powder",
+    "chilli": "chili powder",
+    "cajun seasoning": "paprika",
+    "cajun": "paprika",
+    "onion salt": "onion powder",
+    "allspice": "cinnamon",
+    "bay leaves": "bay leaf",
+    "cloves": "cinnamon",
+    "chili seasoning": "chili powder",
+    "pinch red pepper flakes": "red pepper flakes",
+    # Sauce/condiment variants
+    "tomato puree": "tomato paste",
+    "chilli sauce": "hot sauce",
+    "tomato ketchup": "ketchup",
+    "barbeque sauce": "bbq sauce",
+    "marinara sauce": "tomato sauce",
+    "marinara": "tomato sauce",
+    "dijon mustard": "mustard",
+    "caesar dressing": "ranch dressing",
+    "tzatziki sauce": "greek yogurt",
+    "chipotle crema": "mexican crema",
+    "chipotle chili paste": "chipotle seasoning",
+    # Stock/broth variants
+    "chicken stock": "chicken broth",
+    "beef stock": "chicken broth",
+    "vegetable stock": "vegetable broth",
+    "beef broth": "chicken broth",
+    # Canned/jarred variants
+    "canned beans": "black beans",
+    "refried beans": "black beans",
+    "beans": "black beans",
+    "chopped tomatoes": "diced tomatoes",
+    "canned tomatoes": "diced tomatoes",
+    "canned crushed tomatoes": "diced tomatoes",
+    "canned artichokes": "artichoke hearts",
+    # Grain/starch variants
+    "cooked rice": "rice",
+    "jasmine rice": "rice",
+    "plain flour": "flour",
+    "starch": "cornstarch",
+    "caster sugar": "sugar",
+    "flour tortillas": "tortilla",
+    "hamburger buns": "slider bun",
+    "sub rolls": "bread",
+    "pita bread": "flatbread",
+    "pita": "flatbread",
+    # Misc
+    "sesame seed": "sesame seeds",
+    "sesame seeds": "sesame seeds",
+    "red wine vinegar": "balsamic vinegar",
+    "sake": "rice vinegar",
+    "mirin": "rice vinegar",
+    "cream of chicken": "chicken broth",
+    "egg white": "egg",
+    "optional: maple syrup": "maple syrup",
+    "optional: sour cream": "sour cream",
+    # Shorthand from markdown recipes
+    "fajita": "fajita seasoning",
+    "frozen": "frozen vegetables",
 }
 
 # Store section classification
@@ -180,6 +285,9 @@ SECTION_MAP: dict[str, str] = {
     "snow peas": "produce",
     "bean sprouts": "produce",
     "bok choy": "produce",
+    "shallot": "produce",
+    "apple": "produce",
+    "orange": "produce",
     "dates": "produce",
     "dried dates": "produce",
     # Dairy
@@ -315,6 +423,243 @@ SECTION_MAP: dict[str, str] = {
     # Dairy — additional
     "half and half": "dairy",
 }
+
+# Per-serving quantity defaults: normalized_name → (qty_per_serving, unit)
+# Stored quantities = qty_per_serving * base_servings (typically 4)
+QUANTITY_DEFAULTS: dict[str, tuple[float, str]] = {
+    # Proteins (per serving)
+    "chicken breast": (0.375, "lb"),
+    "chicken thigh": (0.375, "lb"),
+    "steak": (0.375, "lb"),
+    "ground beef": (0.375, "lb"),
+    "ground turkey": (0.375, "lb"),
+    "ground lamb": (0.375, "lb"),
+    "pork": (0.375, "lb"),
+    "pulled pork": (0.375, "lb"),
+    "pork tenderloin": (0.375, "lb"),
+    "pork chop": (1, "whole"),
+    "shrimp": (0.375, "lb"),
+    "salmon": (0.375, "lb"),
+    "salmon fillet": (1, "fillet"),
+    "cod": (1, "fillet"),
+    "pollock": (1, "fillet"),
+    "tuna": (0.375, "lb"),
+    "fish": (1, "fillet"),
+    "tofu": (0.25, "block"),
+    "bacon": (0.5, "slice"),
+    "sausage": (0.375, "lb"),
+    "ham": (0.375, "lb"),
+    "meatballs": (0.375, "lb"),
+    "lamb": (0.375, "lb"),
+    # Canned goods (per serving → 1 can for 4)
+    "black beans": (0.25, "can"),
+    "chickpeas": (0.25, "can"),
+    "diced tomatoes": (0.25, "can"),
+    "canned corn": (0.25, "can"),
+    "coconut milk": (0.25, "can"),
+    "enchilada sauce": (0.25, "can"),
+    "tomato sauce": (0.25, "can"),
+    "tomato paste": (0.5, "tbsp"),
+    # Produce — large items (fraction of whole per serving)
+    "onion": (0.25, "whole"),
+    "red onion": (0.25, "whole"),
+    "bell pepper": (0.25, "whole"),
+    "zucchini": (0.25, "whole"),
+    "eggplant": (0.25, "whole"),
+    "potato": (0.5, "whole"),
+    "sweet potato": (0.5, "whole"),
+    "avocado": (0.25, "whole"),
+    "lemon": (0.25, "whole"),
+    "lime": (0.25, "whole"),
+    "jalapeño": (0.25, "whole"),
+    "tomato": (0.25, "whole"),
+    "cucumber": (0.25, "whole"),
+    "cauliflower": (0.25, "head"),
+    "cabbage": (0.125, "head"),
+    # Produce — leafy/chopped (per serving)
+    "broccoli": (0.5, "cup"),
+    "spinach": (0.5, "cup"),
+    "kale": (0.5, "cup"),
+    "lettuce": (0.5, "cup"),
+    "carrot": (0.25, "whole"),
+    "celery": (0.25, "stalk"),
+    "mushroom": (0.25, "cup"),
+    "green beans": (0.25, "cup"),
+    "corn": (0.25, "cup"),
+    "peas": (0.25, "cup"),
+    "cherry tomatoes": (0.25, "cup"),
+    "shallot": (0.25, "whole"),
+    "apple": (0.5, "whole"),
+    "orange": (0.5, "whole"),
+    # Produce — herbs & aromatics
+    "garlic": (0.5, "clove"),
+    "ginger": (0.25, "tsp"),
+    "cilantro": (0.5, "tbsp"),
+    "fresh basil": (0.5, "tbsp"),
+    "fresh parsley": (0.5, "tbsp"),
+    "green onion": (0.5, "stalk"),
+    # Dairy — cheese
+    "cheese": (0.25, "cup"),
+    "cheddar cheese": (0.25, "cup"),
+    "monterey jack cheese": (0.25, "cup"),
+    "parmesan cheese": (1, "tbsp"),
+    "mozzarella": (0.25, "cup"),
+    "feta cheese": (1, "tbsp"),
+    "cream cheese": (1, "tbsp"),
+    "ricotta": (0.25, "cup"),
+    # Dairy — other
+    "sour cream": (1, "tbsp"),
+    "mexican crema": (1, "tbsp"),
+    "greek yogurt": (1, "tbsp"),
+    "heavy cream": (1, "tbsp"),
+    "cream": (1, "tbsp"),
+    "milk": (0.25, "cup"),
+    "half and half": (1, "tbsp"),
+    "butter": (0.5, "tbsp"),
+    "egg": (1, "whole"),
+    # Grains & starches
+    "rice": (0.25, "cup"),
+    "quinoa": (0.25, "cup"),
+    "couscous": (0.25, "cup"),
+    "pasta": (2, "oz"),
+    "spaghetti": (2, "oz"),
+    "penne": (2, "oz"),
+    "ziti": (2, "oz"),
+    "rotini": (2, "oz"),
+    "fettuccine": (2, "oz"),
+    "campanelle": (2, "oz"),
+    "egg noodles": (2, "oz"),
+    "noodles": (2, "oz"),
+    "ramen noodles": (2, "oz"),
+    "rice noodles": (2, "oz"),
+    "vermicelli": (2, "oz"),
+    "tortellini": (2, "oz"),
+    "tortilla": (1, "whole"),
+    "flatbread": (1, "whole"),
+    "slider bun": (1, "whole"),
+    "bread": (1, "slice"),
+    "biscuits": (1, "whole"),
+    "lentils": (0.25, "cup"),
+    "wonton wrapper": (3, "whole"),
+    # Oils
+    "olive oil": (0.5, "tbsp"),
+    "vegetable oil": (0.5, "tbsp"),
+    "sesame oil": (0.25, "tsp"),
+    "coconut oil": (0.5, "tbsp"),
+    "oil": (0.5, "tbsp"),
+    # Sauces & condiments
+    "soy sauce": (0.75, "tbsp"),
+    "fish sauce": (0.25, "tsp"),
+    "oyster sauce": (0.5, "tbsp"),
+    "teriyaki sauce": (1, "tbsp"),
+    "sriracha": (0.25, "tsp"),
+    "hot sauce": (0.25, "tsp"),
+    "bbq sauce": (1, "tbsp"),
+    "ketchup": (0.5, "tbsp"),
+    "mustard": (0.25, "tsp"),
+    "worcestershire sauce": (0.25, "tsp"),
+    "pesto": (1, "tbsp"),
+    "alfredo sauce": (0.25, "cup"),
+    "salsa": (1, "tbsp"),
+    "harissa paste": (0.5, "tsp"),
+    "peanut butter": (1, "tbsp"),
+    "honey": (0.5, "tbsp"),
+    "maple syrup": (0.5, "tbsp"),
+    "ranch dressing": (1, "tbsp"),
+    "chicken broth": (0.25, "cup"),
+    "vegetable broth": (0.25, "cup"),
+    # Vinegars
+    "rice vinegar": (0.5, "tsp"),
+    "balsamic vinegar": (0.5, "tsp"),
+    "white wine vinegar": (0.5, "tsp"),
+    "apple cider vinegar": (0.5, "tsp"),
+    # Baking & thickeners
+    "flour": (1, "tbsp"),
+    "cornstarch": (0.25, "tsp"),
+    "sugar": (0.25, "tsp"),
+    "brown sugar": (0.5, "tsp"),
+    "panko breadcrumbs": (2, "tbsp"),
+    "breadcrumbs": (2, "tbsp"),
+    # Spices & seasonings (tiny per-serving amounts)
+    "salt": (0.125, "tsp"),
+    "pepper": (0.125, "tsp"),
+    "black pepper": (0.125, "tsp"),
+    "garlic powder": (0.125, "tsp"),
+    "onion powder": (0.125, "tsp"),
+    "cumin": (0.125, "tsp"),
+    "paprika": (0.125, "tsp"),
+    "chili powder": (0.125, "tsp"),
+    "oregano": (0.125, "tsp"),
+    "italian seasoning": (0.125, "tsp"),
+    "curry powder": (0.125, "tsp"),
+    "turmeric": (0.125, "tsp"),
+    "cinnamon": (0.125, "tsp"),
+    "red pepper flakes": (0.0625, "tsp"),
+    "thyme": (0.125, "tsp"),
+    "basil": (0.125, "tsp"),
+    "rosemary": (0.125, "tsp"),
+    "parsley": (0.125, "tsp"),
+    "dill": (0.125, "tsp"),
+    "bay leaf": (0.25, "whole"),
+    "fajita seasoning": (0.25, "tbsp"),
+    "taco seasoning": (0.25, "tbsp"),
+    "ranch seasoning": (0.25, "tbsp"),
+    "chipotle seasoning": (0.25, "tsp"),
+    "brown gravy mix": (0.25, "tbsp"),
+    # Nuts & seeds
+    "peanuts": (1, "tbsp"),
+    "cashews": (1, "tbsp"),
+    "almonds": (1, "tbsp"),
+    "sesame seeds": (0.25, "tsp"),
+    # Frozen
+    "frozen vegetables": (0.5, "cup"),
+    "frozen corn": (0.25, "cup"),
+    "frozen peas": (0.25, "cup"),
+    "frozen shrimp": (0.375, "lb"),
+    "hash browns": (0.5, "cup"),
+    "cauliflower rice": (0.5, "cup"),
+    "puff pastry": (0.25, "sheet"),
+    # Misc
+    "fritos": (0.25, "cup"),
+    "dates": (2, "whole"),
+    "dried dates": (2, "whole"),
+}
+
+# Category-level fallback defaults for items in SECTION_MAP but not in QUANTITY_DEFAULTS
+_CATEGORY_DEFAULTS: dict[str, tuple[float, str]] = {
+    "protein": (0.375, "lb"),
+    "produce": (0.25, "whole"),
+    "frozen": (0.5, "cup"),
+}
+
+
+def get_default_qty(normalized_name: str) -> tuple[float | None, str | None]:
+    """Look up a per-serving default quantity for an ingredient.
+
+    Returns (qty_per_serving, unit) or (None, None) if no default found.
+    Priority: exact match in QUANTITY_DEFAULTS → category fallback via SECTION_MAP.
+    """
+    # Exact match
+    if normalized_name in QUANTITY_DEFAULTS:
+        return QUANTITY_DEFAULTS[normalized_name]
+
+    # Category fallback via SECTION_MAP
+    section = SECTION_MAP.get(normalized_name)
+    if section:
+        # Special cases within categories
+        if section == "dairy" and "cheese" in normalized_name:
+            return (0.25, "cup")
+        if section == "dairy":
+            return (1, "tbsp")
+        if section == "pantry":
+            # Check if it looks like a sauce/condiment or seasoning
+            # (these are items in SECTION_MAP but not in QUANTITY_DEFAULTS)
+            return (0.125, "tsp")
+        if section in _CATEGORY_DEFAULTS:
+            return _CATEGORY_DEFAULTS[section]
+
+    return (None, None)
+
 
 # Common staples to pre-populate on first run (~20 items across categories)
 DEFAULT_PANTRY = [

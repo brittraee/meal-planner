@@ -103,6 +103,7 @@ def _migrate(conn: sqlite3.Connection) -> None:
         ("recipes", "image_url", "TEXT"),
         ("recipe_ingredients", "qty", "REAL"),
         ("recipe_ingredients", "unit", "TEXT"),
+        ("recipe_ingredients", "qty_source", "TEXT"),  # "default" | "scraped" | "manual"
         ("planned_meals", "servings", "INTEGER"),
     ]
     for table, column, definition in migrations:
@@ -120,8 +121,26 @@ def _migrate(conn: sqlite3.Connection) -> None:
 
 
 def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
-    """Insert or replace a recipe. Always refreshes ingredients from markdown."""
+    """Insert or replace a recipe. Always refreshes ingredients from markdown.
+
+    Preserves scraped/manual qty data across re-imports. Applies defaults
+    for ingredients that have no saved higher-priority source.
+    """
+    from src.ingredients import get_default_qty
+
     with conn:
+        # Save scraped/manual qty before deleting ingredient rows
+        saved: dict[str, tuple[float, str | None, str]] = {}
+        for row in conn.execute(
+            "SELECT normalized_name, qty, unit, qty_source "
+            "FROM recipe_ingredients WHERE recipe_id = ?",
+            (recipe.filename,),
+        ).fetchall():
+            if row["qty_source"] in ("scraped", "manual") and row["qty"] is not None:
+                saved[row["normalized_name"]] = (
+                    row["qty"], row["unit"], row["qty_source"],
+                )
+
         conn.execute(
             """INSERT OR REPLACE INTO recipes
                (id, title, prep_notes, source_file, protein, instructions)
@@ -139,12 +158,24 @@ def insert_recipe(conn: sqlite3.Connection, recipe: Recipe) -> None:
         conn.execute(
             "DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe.filename,)
         )
+
+        base_servings = 4
         for ing in recipe.ingredients:
+            if ing.normalized in saved:
+                qty, unit, source = saved[ing.normalized]
+            else:
+                dq, du = get_default_qty(ing.normalized)
+                qty = dq * base_servings if dq else None
+                unit = du
+                source = "default" if dq else None
+
             conn.execute(
                 """INSERT INTO recipe_ingredients
-                   (recipe_id, raw_text, normalized_name, is_optional)
-                   VALUES (?, ?, ?, ?)""",
-                (recipe.filename, ing.name, ing.normalized, 1 if ing.optional else 0),
+                   (recipe_id, raw_text, normalized_name, is_optional,
+                    qty, unit, qty_source)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (recipe.filename, ing.name, ing.normalized,
+                 1 if ing.optional else 0, qty, unit, source),
             )
 
         # Tags always refresh (low risk, no qty data)
@@ -185,18 +216,31 @@ def insert_recipe_dict(conn: sqlite3.Connection, data: dict[str, Any]) -> None:
         conn.execute("DELETE FROM recipe_ingredients WHERE recipe_id = ?", (data["id"],))
         conn.execute("DELETE FROM recipe_tags WHERE recipe_id = ?", (data["id"],))
 
+        # Infer qty_source from source_type
+        source_type = data.get("source_type", "manual")
+        if source_type in ("url", "mealdb"):
+            default_qty_source = "scraped"
+        elif source_type == "manual":
+            default_qty_source = "manual"
+        else:
+            default_qty_source = None
+
         for ing in data.get("ingredients", []):
+            qty = ing.get("qty")
+            qty_source = default_qty_source if qty is not None else None
             conn.execute(
                 """INSERT INTO recipe_ingredients
-                   (recipe_id, raw_text, normalized_name, is_optional, qty, unit)
-                   VALUES (?, ?, ?, ?, ?, ?)""",
+                   (recipe_id, raw_text, normalized_name, is_optional,
+                    qty, unit, qty_source)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
                 (
                     data["id"],
                     ing.get("raw_text", ing.get("name", "")),
                     ing.get("normalized_name", ing.get("name", "").lower().strip()),
                     1 if ing.get("is_optional") else 0,
-                    ing.get("qty"),
+                    qty,
                     ing.get("unit"),
+                    qty_source,
                 ),
             )
 

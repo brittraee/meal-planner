@@ -1,6 +1,12 @@
 """Tests for ingredient parsing and normalization."""
 
-from src.ingredients import DEFAULT_PANTRY, get_section, normalize, parse_ingredient
+from src.ingredients import (
+    DEFAULT_PANTRY,
+    get_default_qty,
+    get_section,
+    normalize,
+    parse_ingredient,
+)
 
 
 class TestParseIngredient:
@@ -136,3 +142,41 @@ class TestGetSection:
 
     def test_unknown_section(self):
         assert get_section("dragon fruit") == "other"
+
+
+class TestGetDefaultQty:
+    def test_exact_match_protein(self):
+        qty, unit = get_default_qty("chicken breast")
+        assert qty == 0.375
+        assert unit == "lb"
+
+    def test_exact_match_spice(self):
+        qty, unit = get_default_qty("cumin")
+        assert qty == 0.125
+        assert unit == "tsp"
+
+    def test_exact_match_canned(self):
+        qty, unit = get_default_qty("black beans")
+        assert qty == 0.25
+        assert unit == "can"
+
+    def test_exact_match_dairy(self):
+        qty, unit = get_default_qty("cream cheese")
+        assert qty == 1
+        assert unit == "tbsp"
+
+    def test_category_fallback_protein(self):
+        """Protein in SECTION_MAP but not QUANTITY_DEFAULTS gets category default."""
+        qty, unit = get_default_qty("turkey")
+        assert qty == 0.375
+        assert unit == "lb"
+
+    def test_category_fallback_produce(self):
+        qty, unit = get_default_qty("artichoke hearts")
+        assert qty == 0.25
+        assert unit == "whole"
+
+    def test_no_match_returns_none(self):
+        qty, unit = get_default_qty("unicorn tears")
+        assert qty is None
+        assert unit is None

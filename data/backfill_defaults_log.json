@@ -1,0 +1,984 @@
+[
+  {
+    "id": 27965,
+    "recipe_id": "159_Lamb_and_Lemon_Souvlaki",
+    "normalized_name": "greek salad or lettuce and tomato slices",
+    "status": "no_default"
+  },
+  {
+    "id": 27966,
+    "recipe_id": "159_Lamb_and_Lemon_Souvlaki",
+    "normalized_name": "greek lemon rice",
+    "status": "no_default"
+  },
+  {
+    "id": 27979,
+    "recipe_id": "163_Lamb_Tzatziki_Burgers",
+    "normalized_name": "burger buns or pita bread",
+    "status": "no_default"
+  },
+  {
+    "id": 27985,
+    "recipe_id": "163_Lamb_Tzatziki_Burgers",
+    "normalized_name": "pitted kalamata olives",
+    "status": "no_default"
+  },
+  {
+    "id": 28143,
+    "recipe_id": "211_Squash_linguine",
+    "normalized_name": "optional additional garnishes: shaved parmesan or pecorino and/or smoked salt",
+    "status": "no_default"
+  },
+  {
+    "id": 30633,
+    "recipe_id": "01_Sheet_Pan_Chicken_Fajitas",
+    "normalized_name": "fajita",
+    "status": "updated",
+    "qty": 1.0,
+    "unit": "tbsp"
+  },
+  {
+    "id": 30638,
+    "recipe_id": "02_Cheesy_Chicken_Broccoli_Rice_Bake",
+    "normalized_name": "frozen",
+    "status": "updated",
+    "qty": 2.0,
+    "unit": "cup"
+  },
+  {
+    "id": 30641,
+    "recipe_id": "02_Cheesy_Chicken_Broccoli_Rice_Bake",
+    "normalized_name": "crispy fried onions",
+    "status": "no_default"
+  },
+  {
+    "id": 30652,
+    "recipe_id": "04_Mediterranean_Chicken_Wraps",
+    "normalized_name": "hummus",
+    "status": "no_default"
+  },
+  {
+    "id": 30668,
+    "recipe_id": "105_Chicken_Shawarma_with_homemade_garlic_herb_yoghurt_sauce",
+    "normalized_name": "ground coriander",
+    "status": "no_default"
+  },
+  {
+    "id": 30669,
+    "recipe_id": "105_Chicken_Shawarma_with_homemade_garlic_herb_yoghurt_sauce",
+    "normalized_name": "ground cumin",
+    "status": "no_default"
+  },
+  {
+    "id": 30670,
+    "recipe_id": "105_Chicken_Shawarma_with_homemade_garlic_herb_yoghurt_sauce",
+    "normalized_name": "ground cardomom",
+    "status": "no_default"
+  },
+  {
+    "id": 30683,
+    "recipe_id": "110_Chinese_Orange_Chicken",
+    "normalized_name": "orange juice",
+    "status": "no_default"
+  },
+  {
+    "id": 30685,
+    "recipe_id": "110_Chinese_Orange_Chicken",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 30698,
+    "recipe_id": "117_Crispy_Eggplant",
+    "normalized_name": "egg plants",
+    "status": "no_default"
+  },
+  {
+    "id": 30706,
+    "recipe_id": "119_Crock_Pot_Chicken_Baked_Tacos",
+    "normalized_name": "vinaigrette dressing",
+    "status": "no_default"
+  },
+  {
+    "id": 30711,
+    "recipe_id": "119_Crock_Pot_Chicken_Baked_Tacos",
+    "normalized_name": "hard taco shells",
+    "status": "no_default"
+  },
+  {
+    "id": 30712,
+    "recipe_id": "119_Crock_Pot_Chicken_Baked_Tacos",
+    "normalized_name": "shredded mexican cheese",
+    "status": "no_default"
+  },
+  {
+    "id": 30713,
+    "recipe_id": "122_Drunken_noodles_pad_kee_mao",
+    "normalized_name": "flat rice noodles",
+    "status": "no_default"
+  },
+  {
+    "id": 30716,
+    "recipe_id": "122_Drunken_noodles_pad_kee_mao",
+    "normalized_name": "birds-eye chillies",
+    "status": "no_default"
+  },
+  {
+    "id": 30721,
+    "recipe_id": "12_Steak_Broccoli_Teriyaki_Bowls",
+    "normalized_name": "steaks",
+    "status": "no_default"
+  },
+  {
+    "id": 30727,
+    "recipe_id": "130_Falafel_Pita_Sandwich_with_Tahini_Sauce",
+    "normalized_name": "falafel",
+    "status": "no_default"
+  },
+  {
+    "id": 30728,
+    "recipe_id": "130_Falafel_Pita_Sandwich_with_Tahini_Sauce",
+    "normalized_name": "tahini",
+    "status": "no_default"
+  },
+  {
+    "id": 30729,
+    "recipe_id": "130_Falafel_Pita_Sandwich_with_Tahini_Sauce",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 30730,
+    "recipe_id": "130_Falafel_Pita_Sandwich_with_Tahini_Sauce",
+    "normalized_name": "lemon juice",
+    "status": "no_default"
+  },
+  {
+    "id": 30745,
+    "recipe_id": "133_French_Lentils_With_Garlic_and_Thyme",
+    "normalized_name": "french lentils",
+    "status": "no_default"
+  },
+  {
+    "id": 30763,
+    "recipe_id": "136_French_Onion_Soup",
+    "normalized_name": "dry white wine",
+    "status": "no_default"
+  },
+  {
+    "id": 30825,
+    "recipe_id": "154_kofta_burgers",
+    "normalized_name": "garlic bulb",
+    "status": "no_default"
+  },
+  {
+    "id": 30826,
+    "recipe_id": "154_kofta_burgers",
+    "normalized_name": "garam masala",
+    "status": "no_default"
+  },
+  {
+    "id": 30834,
+    "recipe_id": "155_Kung_Pao_Chicken",
+    "normalized_name": "corn flour",
+    "status": "no_default"
+  },
+  {
+    "id": 30835,
+    "recipe_id": "155_Kung_Pao_Chicken",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 30840,
+    "recipe_id": "15_Orange_Chile_Glazed_Chicken_Double",
+    "normalized_name": "orange juice",
+    "status": "no_default"
+  },
+  {
+    "id": 30853,
+    "recipe_id": "164_Lasagne",
+    "normalized_name": "minced beef",
+    "status": "no_default"
+  },
+  {
+    "id": 30860,
+    "recipe_id": "16_Mediterranean_Chicken_Bowl",
+    "normalized_name": "hummus",
+    "status": "no_default"
+  },
+  {
+    "id": 30863,
+    "recipe_id": "183_Ramen_Noodles_with_Boiled_Egg",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 30879,
+    "recipe_id": "185_Red_curry_chicken_kebabs",
+    "normalized_name": "thai red curry paste",
+    "status": "no_default"
+  },
+  {
+    "id": 30887,
+    "recipe_id": "189_Salmon_noodle_wraps",
+    "normalized_name": "petit pois",
+    "status": "no_default"
+  },
+  {
+    "id": 30914,
+    "recipe_id": "201_Smoky_Lentil_Chili_with_Squash",
+    "normalized_name": "leek",
+    "status": "no_default"
+  },
+  {
+    "id": 30931,
+    "recipe_id": "204_Spaghetti_Bolognese",
+    "normalized_name": "lean minced beef",
+    "status": "no_default"
+  },
+  {
+    "id": 30935,
+    "recipe_id": "204_Spaghetti_Bolognese",
+    "normalized_name": "hot beef stock",
+    "status": "no_default"
+  },
+  {
+    "id": 30944,
+    "recipe_id": "207_Spicy_Arrabiata_Penne",
+    "normalized_name": "penne rigate",
+    "status": "no_default"
+  },
+  {
+    "id": 30951,
+    "recipe_id": "207_Spicy_Arrabiata_Penne",
+    "normalized_name": "parmigiano-reggiano",
+    "status": "no_default"
+  },
+  {
+    "id": 30958,
+    "recipe_id": "209_Spinach_Ricotta_Cannelloni",
+    "normalized_name": "mascarpone",
+    "status": "no_default"
+  },
+  {
+    "id": 30962,
+    "recipe_id": "20_Chicken_Cauliflower_Rice_Bowl",
+    "normalized_name": "stir fry vegetables",
+    "status": "no_default"
+  },
+  {
+    "id": 30974,
+    "recipe_id": "215_Stuffed_Bell_Peppers_with_Quinoa_and_Black_Beans",
+    "normalized_name": "green pepper",
+    "status": "no_default"
+  },
+  {
+    "id": 30980,
+    "recipe_id": "215_Stuffed_Bell_Peppers_with_Quinoa_and_Black_Beans",
+    "normalized_name": "sweetcorn",
+    "status": "no_default"
+  },
+  {
+    "id": 30986,
+    "recipe_id": "217_Sweet_and_Sour_Chicken",
+    "normalized_name": "pineapple chunks",
+    "status": "no_default"
+  },
+  {
+    "id": 30987,
+    "recipe_id": "217_Sweet_and_Sour_Chicken",
+    "normalized_name": "pineapple juice",
+    "status": "no_default"
+  },
+  {
+    "id": 30988,
+    "recipe_id": "217_Sweet_and_Sour_Chicken",
+    "normalized_name": "white vinegar",
+    "status": "no_default"
+  },
+  {
+    "id": 30992,
+    "recipe_id": "218_Sweet_and_Sour_Pork",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 30998,
+    "recipe_id": "219_Szechuan_Beef",
+    "normalized_name": "beef",
+    "status": "no_default"
+  },
+  {
+    "id": 31008,
+    "recipe_id": "21_Spinach_Artichoke_Chicken_Bake",
+    "normalized_name": "frozen spinach",
+    "status": "no_default"
+  },
+  {
+    "id": 31012,
+    "recipe_id": "220_Tahini_Lentils",
+    "normalized_name": "tahini",
+    "status": "no_default"
+  },
+  {
+    "id": 31029,
+    "recipe_id": "222_Teriyaki_Chicken_Casserole",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 31032,
+    "recipe_id": "222_Teriyaki_Chicken_Casserole",
+    "normalized_name": "minced garlic",
+    "status": "no_default"
+  },
+  {
+    "id": 31035,
+    "recipe_id": "222_Teriyaki_Chicken_Casserole",
+    "normalized_name": "stir-fry vegetables",
+    "status": "no_default"
+  },
+  {
+    "id": 31037,
+    "recipe_id": "223_Thai_beef_stir-fry",
+    "normalized_name": "beef",
+    "status": "no_default"
+  },
+  {
+    "id": 31041,
+    "recipe_id": "225_Thai_drumsticks",
+    "normalized_name": "sweet chilli sauce",
+    "status": "no_default"
+  },
+  {
+    "id": 31044,
+    "recipe_id": "225_Thai_drumsticks",
+    "normalized_name": "thai red curry paste",
+    "status": "no_default"
+  },
+  {
+    "id": 31050,
+    "recipe_id": "229_Thai_pork_peanut_curry",
+    "normalized_name": "thai red curry paste",
+    "status": "no_default"
+  },
+  {
+    "id": 31060,
+    "recipe_id": "231_Thai_pumpkin_soup",
+    "normalized_name": "pumpkin",
+    "status": "no_default"
+  },
+  {
+    "id": 31064,
+    "recipe_id": "231_Thai_pumpkin_soup",
+    "normalized_name": "lemongrass",
+    "status": "no_default"
+  },
+  {
+    "id": 31065,
+    "recipe_id": "231_Thai_pumpkin_soup",
+    "normalized_name": "thai red curry paste",
+    "status": "no_default"
+  },
+  {
+    "id": 31068,
+    "recipe_id": "232_Thai_rice_noodle_salad",
+    "normalized_name": "vermicelli rice noodles",
+    "status": "no_default"
+  },
+  {
+    "id": 31072,
+    "recipe_id": "232_Thai_rice_noodle_salad",
+    "normalized_name": "muscovado sugar",
+    "status": "no_default"
+  },
+  {
+    "id": 31075,
+    "recipe_id": "232_Thai_rice_noodle_salad",
+    "normalized_name": "minced pork",
+    "status": "no_default"
+  },
+  {
+    "id": 31081,
+    "recipe_id": "233_Tofu_greens_cashew_stir-fry",
+    "normalized_name": "soya bean",
+    "status": "no_default"
+  },
+  {
+    "id": 31082,
+    "recipe_id": "233_Tofu_greens_cashew_stir-fry",
+    "normalized_name": "pak choi",
+    "status": "no_default"
+  },
+  {
+    "id": 31083,
+    "recipe_id": "233_Tofu_greens_cashew_stir-fry",
+    "normalized_name": "marinated tofu",
+    "status": "no_default"
+  },
+  {
+    "id": 31084,
+    "recipe_id": "236_Tonkatsu_pork",
+    "normalized_name": "pork chops",
+    "status": "no_default"
+  },
+  {
+    "id": 31096,
+    "recipe_id": "237_Tuna_Nicoise",
+    "normalized_name": "capers",
+    "status": "no_default"
+  },
+  {
+    "id": 31105,
+    "recipe_id": "239_Turkey_Meatloaf",
+    "normalized_name": "turkey mince",
+    "status": "no_default"
+  },
+  {
+    "id": 31113,
+    "recipe_id": "241_Vegan_Lasagna",
+    "normalized_name": "green red lentils",
+    "status": "no_default"
+  },
+  {
+    "id": 31119,
+    "recipe_id": "241_Vegan_Lasagna",
+    "normalized_name": "lasagne sheets",
+    "status": "no_default"
+  },
+  {
+    "id": 31120,
+    "recipe_id": "241_Vegan_Lasagna",
+    "normalized_name": "vegan butter",
+    "status": "no_default"
+  },
+  {
+    "id": 31121,
+    "recipe_id": "242_Vegetarian_Casserole",
+    "normalized_name": "rapeseed oil",
+    "status": "no_default"
+  },
+  {
+    "id": 31129,
+    "recipe_id": "243_Vegetarian_Chilli",
+    "normalized_name": "roasted vegetables",
+    "status": "no_default"
+  },
+  {
+    "id": 31130,
+    "recipe_id": "243_Vegetarian_Chilli",
+    "normalized_name": "kidney beans",
+    "status": "no_default"
+  },
+  {
+    "id": 31132,
+    "recipe_id": "243_Vegetarian_Chilli",
+    "normalized_name": "mixed grain",
+    "status": "no_default"
+  },
+  {
+    "id": 31137,
+    "recipe_id": "246_Vietnamese_chicken_salad",
+    "normalized_name": "radish",
+    "status": "no_default"
+  },
+  {
+    "id": 31139,
+    "recipe_id": "246_Vietnamese_chicken_salad",
+    "normalized_name": "mint",
+    "status": "no_default"
+  },
+  {
+    "id": 31142,
+    "recipe_id": "247_Vietnamese_Grilled_Pork_bun-thit-nuong",
+    "normalized_name": "rice vermicelli",
+    "status": "no_default"
+  },
+  {
+    "id": 31143,
+    "recipe_id": "247_Vietnamese_Grilled_Pork_bun-thit-nuong",
+    "normalized_name": "egg rolls",
+    "status": "no_default"
+  },
+  {
+    "id": 31144,
+    "recipe_id": "247_Vietnamese_Grilled_Pork_bun-thit-nuong",
+    "normalized_name": "challots",
+    "status": "no_default"
+  },
+  {
+    "id": 31149,
+    "recipe_id": "248_Vietnamese_pork_salad",
+    "normalized_name": "golden caster sugar",
+    "status": "no_default"
+  },
+  {
+    "id": 31157,
+    "recipe_id": "249_Vietnamese-style_caramel_pork",
+    "normalized_name": "ground nut oil",
+    "status": "no_default"
+  },
+  {
+    "id": 31158,
+    "recipe_id": "249_Vietnamese-style_caramel_pork",
+    "normalized_name": "pork shoulder steaks",
+    "status": "no_default"
+  },
+  {
+    "id": 31173,
+    "recipe_id": "251_Yaki_Udon",
+    "normalized_name": "udon noodles",
+    "status": "no_default"
+  },
+  {
+    "id": 31177,
+    "recipe_id": "251_Yaki_Udon",
+    "normalized_name": "shiitake mushrooms",
+    "status": "no_default"
+  },
+  {
+    "id": 31187,
+    "recipe_id": "252_Classic_Cheeseburgers",
+    "normalized_name": "optional: pickles",
+    "status": "no_default"
+  },
+  {
+    "id": 31188,
+    "recipe_id": "253_Italian_Sub",
+    "normalized_name": "italian deli meat",
+    "status": "no_default"
+  },
+  {
+    "id": 31194,
+    "recipe_id": "253_Italian_Sub",
+    "normalized_name": "italian dressing",
+    "status": "no_default"
+  },
+  {
+    "id": 31199,
+    "recipe_id": "254_BLT_Sandwiches",
+    "normalized_name": "mayonnaise",
+    "status": "no_default"
+  },
+  {
+    "id": 31205,
+    "recipe_id": "255_Breakfast_Burritos",
+    "normalized_name": "optional: salsa",
+    "status": "no_default"
+  },
+  {
+    "id": 31206,
+    "recipe_id": "256_Pancakes_and_Bacon",
+    "normalized_name": "pancake mix",
+    "status": "no_default"
+  },
+  {
+    "id": 31212,
+    "recipe_id": "257_Mac_and_Cheese",
+    "normalized_name": "elbow macaroni",
+    "status": "no_default"
+  },
+  {
+    "id": 31216,
+    "recipe_id": "257_Mac_and_Cheese",
+    "normalized_name": "sharp cheddar cheese",
+    "status": "no_default"
+  },
+  {
+    "id": 31217,
+    "recipe_id": "257_Mac_and_Cheese",
+    "normalized_name": "optional: breadcrumbs",
+    "status": "no_default"
+  },
+  {
+    "id": 31218,
+    "recipe_id": "258_Baked_Ziti",
+    "normalized_name": "ziti pasta",
+    "status": "no_default"
+  },
+  {
+    "id": 31221,
+    "recipe_id": "258_Baked_Ziti",
+    "normalized_name": "ricotta cheese",
+    "status": "no_default"
+  },
+  {
+    "id": 31227,
+    "recipe_id": "259_Chicken_Caesar_Wraps",
+    "normalized_name": "romaine lettuce",
+    "status": "no_default"
+  },
+  {
+    "id": 31230,
+    "recipe_id": "259_Chicken_Caesar_Wraps",
+    "normalized_name": "optional: croutons",
+    "status": "no_default"
+  },
+  {
+    "id": 31231,
+    "recipe_id": "25_Broccoli_Cheddar_Stuffed_Potatoes",
+    "normalized_name": "russet",
+    "status": "no_default"
+  },
+  {
+    "id": 31254,
+    "recipe_id": "262_Fish_and_Chips",
+    "normalized_name": "optional: malt vinegar",
+    "status": "no_default"
+  },
+  {
+    "id": 31255,
+    "recipe_id": "263_Baked_Tilapia_with_Veggies",
+    "normalized_name": "tilapia fillets",
+    "status": "no_default"
+  },
+  {
+    "id": 31267,
+    "recipe_id": "264_Turkey_Burgers",
+    "normalized_name": "optional: avocado",
+    "status": "no_default"
+  },
+  {
+    "id": 31268,
+    "recipe_id": "265_Philly_Cheesesteak",
+    "normalized_name": "ribeye",
+    "status": "no_default"
+  },
+  {
+    "id": 31269,
+    "recipe_id": "265_Philly_Cheesesteak",
+    "normalized_name": "hoagie rolls",
+    "status": "no_default"
+  },
+  {
+    "id": 31273,
+    "recipe_id": "265_Philly_Cheesesteak",
+    "normalized_name": "optional: mushrooms",
+    "status": "no_default"
+  },
+  {
+    "id": 31288,
+    "recipe_id": "268_Beef_Tacos",
+    "normalized_name": "taco shells",
+    "status": "no_default"
+  },
+  {
+    "id": 31306,
+    "recipe_id": "26_Chicken_Tortilla_Soup",
+    "normalized_name": "tortilla strips",
+    "status": "no_default"
+  },
+  {
+    "id": 31316,
+    "recipe_id": "271_Grilled_Cheese_and_Tomato_Soup",
+    "normalized_name": "american",
+    "status": "no_default"
+  },
+  {
+    "id": 31331,
+    "recipe_id": "30_BBQ_Pork_Sliders",
+    "normalized_name": "pickles",
+    "status": "no_default"
+  },
+  {
+    "id": 31332,
+    "recipe_id": "30_BBQ_Pork_Sliders",
+    "normalized_name": "coleslaw mix + dressing",
+    "status": "no_default"
+  },
+  {
+    "id": 31336,
+    "recipe_id": "31_Pork_Fried_Rice",
+    "normalized_name": "frozen stir fry vegetables",
+    "status": "no_default"
+  },
+  {
+    "id": 31342,
+    "recipe_id": "32_Pork_Tacos_with_Quick_Slaw",
+    "normalized_name": "coleslaw mix",
+    "status": "no_default"
+  },
+  {
+    "id": 31363,
+    "recipe_id": "36_Pork_Veggie_Stir_Fry",
+    "normalized_name": "stir fry vegetables",
+    "status": "no_default"
+  },
+  {
+    "id": 31389,
+    "recipe_id": "43_Taco_Salad",
+    "normalized_name": "ground meat",
+    "status": "no_default"
+  },
+  {
+    "id": 31394,
+    "recipe_id": "43_Taco_Salad",
+    "normalized_name": "tortilla chips",
+    "status": "no_default"
+  },
+  {
+    "id": 31401,
+    "recipe_id": "44_Chili",
+    "normalized_name": "optional: bell pepper",
+    "status": "no_default"
+  },
+  {
+    "id": 31403,
+    "recipe_id": "45_Chicken_and_Biscuits",
+    "normalized_name": "cream of chicken soup",
+    "status": "no_default"
+  },
+  {
+    "id": 31405,
+    "recipe_id": "45_Chicken_and_Biscuits",
+    "normalized_name": "refrigerated",
+    "status": "no_default"
+  },
+  {
+    "id": 31407,
+    "recipe_id": "48_Ramen_Noodle_Salad",
+    "normalized_name": "instant ramen",
+    "status": "no_default"
+  },
+  {
+    "id": 31408,
+    "recipe_id": "48_Ramen_Noodle_Salad",
+    "normalized_name": "coleslaw mix",
+    "status": "no_default"
+  },
+  {
+    "id": 31409,
+    "recipe_id": "48_Ramen_Noodle_Salad",
+    "normalized_name": "sliced almonds",
+    "status": "no_default"
+  },
+  {
+    "id": 31411,
+    "recipe_id": "48_Ramen_Noodle_Salad",
+    "normalized_name": "sesame dressing",
+    "status": "no_default"
+  },
+  {
+    "id": 31414,
+    "recipe_id": "49_Broccoli_Salad",
+    "normalized_name": "bacon bits",
+    "status": "no_default"
+  },
+  {
+    "id": 31416,
+    "recipe_id": "49_Broccoli_Salad",
+    "normalized_name": "raisins",
+    "status": "no_default"
+  },
+  {
+    "id": 31417,
+    "recipe_id": "49_Broccoli_Salad",
+    "normalized_name": "mayo + vinegar + sugar",
+    "status": "no_default"
+  },
+  {
+    "id": 31420,
+    "recipe_id": "50_Taco_Pie",
+    "normalized_name": "crescent rolls",
+    "status": "no_default"
+  },
+  {
+    "id": 31424,
+    "recipe_id": "51_Creole_Fish_Cakes_with_Corn_Succotash",
+    "normalized_name": "white fish fillets",
+    "status": "no_default"
+  },
+  {
+    "id": 31425,
+    "recipe_id": "51_Creole_Fish_Cakes_with_Corn_Succotash",
+    "normalized_name": "poblano pepper",
+    "status": "no_default"
+  },
+  {
+    "id": 31427,
+    "recipe_id": "51_Creole_Fish_Cakes_with_Corn_Succotash",
+    "normalized_name": "red bell pepper",
+    "status": "no_default"
+  },
+  {
+    "id": 31442,
+    "recipe_id": "53_Red_Pepper_Pasta_with_Lemon_Broccoli",
+    "normalized_name": "roasted red peppers",
+    "status": "no_default"
+  },
+  {
+    "id": 31445,
+    "recipe_id": "53_Red_Pepper_Pasta_with_Lemon_Broccoli",
+    "normalized_name": "capers",
+    "status": "no_default"
+  },
+  {
+    "id": 31447,
+    "recipe_id": "54_Pork_Egg_Roll_Bowl",
+    "normalized_name": "ground pork",
+    "status": "no_default"
+  },
+  {
+    "id": 31448,
+    "recipe_id": "54_Pork_Egg_Roll_Bowl",
+    "normalized_name": "slaw mix",
+    "status": "no_default"
+  },
+  {
+    "id": 31451,
+    "recipe_id": "54_Pork_Egg_Roll_Bowl",
+    "normalized_name": "sweet & sour",
+    "status": "no_default"
+  },
+  {
+    "id": 31452,
+    "recipe_id": "54_Pork_Egg_Roll_Bowl",
+    "normalized_name": "dijon",
+    "status": "no_default"
+  },
+  {
+    "id": 31454,
+    "recipe_id": "54_Pork_Egg_Roll_Bowl",
+    "normalized_name": "crispy wonton strips",
+    "status": "no_default"
+  },
+  {
+    "id": 31484,
+    "recipe_id": "61_Sheet_Pan_Steak_Fajitas",
+    "normalized_name": "steak strips",
+    "status": "no_default"
+  },
+  {
+    "id": 31492,
+    "recipe_id": "62_Smothered_Steak_and_Gravy_Bowls",
+    "normalized_name": "mashed potatoes",
+    "status": "no_default"
+  },
+  {
+    "id": 31497,
+    "recipe_id": "63_BBQ_Meatball_Sliders",
+    "normalized_name": "pickles",
+    "status": "no_default"
+  },
+  {
+    "id": 31510,
+    "recipe_id": "65_Honey_Soy_Shrimp_and_Rice_Bowls",
+    "normalized_name": "frozen mixed veg",
+    "status": "no_default"
+  },
+  {
+    "id": 31527,
+    "recipe_id": "71_Baked_salmon_with_fennel_tomatoes",
+    "normalized_name": "fennel",
+    "status": "no_default"
+  },
+  {
+    "id": 31533,
+    "recipe_id": "71_Baked_salmon_with_fennel_tomatoes",
+    "normalized_name": "black olives",
+    "status": "no_default"
+  },
+  {
+    "id": 31541,
+    "recipe_id": "73_BBQ_Pork_Sloppy_Joes",
+    "normalized_name": "hotsauce",
+    "status": "no_default"
+  },
+  {
+    "id": 31543,
+    "recipe_id": "75_Beef_and_Broccoli_Stir-Fry",
+    "normalized_name": "dry sherry",
+    "status": "no_default"
+  },
+  {
+    "id": 31566,
+    "recipe_id": "79_Beef_Empanadas",
+    "normalized_name": "lard",
+    "status": "no_default"
+  },
+  {
+    "id": 31567,
+    "recipe_id": "79_Beef_Empanadas",
+    "normalized_name": "water",
+    "status": "no_default"
+  },
+  {
+    "id": 31574,
+    "recipe_id": "80_Beef_Lo_Mein",
+    "normalized_name": "beef",
+    "status": "no_default"
+  },
+  {
+    "id": 31589,
+    "recipe_id": "83_Beef_stroganoff",
+    "normalized_name": "creme fraiche",
+    "status": "no_default"
+  },
+  {
+    "id": 31591,
+    "recipe_id": "85_Beef_Wellington",
+    "normalized_name": "english mustard",
+    "status": "no_default"
+  },
+  {
+    "id": 31594,
+    "recipe_id": "85_Beef_Wellington",
+    "normalized_name": "parma ham",
+    "status": "no_default"
+  },
+  {
+    "id": 31597,
+    "recipe_id": "85_Beef_Wellington",
+    "normalized_name": "egg yolks",
+    "status": "no_default"
+  },
+  {
+    "id": 31598,
+    "recipe_id": "87_Braised_Beef_Chilli",
+    "normalized_name": "beef",
+    "status": "no_default"
+  },
+  {
+    "id": 31608,
+    "recipe_id": "89_Cajun_spiced_fish_tacos",
+    "normalized_name": "white fish",
+    "status": "no_default"
+  },
+  {
+    "id": 31610,
+    "recipe_id": "89_Cajun_spiced_fish_tacos",
+    "normalized_name": "flour tortilla",
+    "status": "no_default"
+  },
+  {
+    "id": 31612,
+    "recipe_id": "89_Cajun_spiced_fish_tacos",
+    "normalized_name": "little gem lettuce",
+    "status": "no_default"
+  },
+  {
+    "id": 31626,
+    "recipe_id": "93_Chicken_Alfredo_Primavera",
+    "normalized_name": "squash",
+    "status": "no_default"
+  },
+  {
+    "id": 31631,
+    "recipe_id": "97_Chicken_Enchilada_Casserole",
+    "normalized_name": "shredded monterey jack cheese",
+    "status": "no_default"
+  },
+  {
+    "id": 31632,
+    "recipe_id": "97_Chicken_Enchilada_Casserole",
+    "normalized_name": "corn tortillas",
+    "status": "no_default"
+  },
+  {
+    "id": 31634,
+    "recipe_id": "98_Chicken_Fajita_Mac_and_Cheese",
+    "normalized_name": "macaroni",
+    "status": "no_default"
+  }
+]

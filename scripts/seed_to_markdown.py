@@ -27,7 +27,6 @@ INCLUDE_TITLES: set[str] = {
     # American classics
     "BBQ Pork Sloppy Joes",
     "Beef Brisket Pot Roast",
-    "Big Mac",
     "Braised Beef Chilli",
     "Chick-Fil-A Sandwich",
     "Chicken Enchilada Casserole",

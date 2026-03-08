@@ -85,17 +85,20 @@ def backfill_recipe(conn, recipe_id: str, url: str, dry_run: bool = False) -> di
     # Replace ingredient rows with scraped data (preserves recipe metadata)
     conn.execute("DELETE FROM recipe_ingredients WHERE recipe_id = ?", (recipe_id,))
     for ing in scraped["ingredients"]:
+        qty = ing.get("qty")
         conn.execute(
             """INSERT INTO recipe_ingredients
-               (recipe_id, raw_text, normalized_name, is_optional, qty, unit)
-               VALUES (?, ?, ?, ?, ?, ?)""",
+               (recipe_id, raw_text, normalized_name, is_optional,
+                qty, unit, qty_source)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
             (
                 recipe_id,
                 ing["raw_text"],
                 ing["normalized_name"],
                 1 if ing.get("is_optional") else 0,
-                ing.get("qty"),
+                qty,
                 ing.get("unit"),
+                "scraped" if qty is not None else None,
             ),
         )
 
