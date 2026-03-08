@@ -24,7 +24,8 @@ settings = get_user_settings(conn)
 current_servings = settings["servings"] if settings else 4
 current_meals = settings["meals_per_week"] if settings else 5
 
-with st.form("preferences_form"):
+# --- Preferences (no form — save at bottom) ---
+with st.container(border=True):
     _serv_col, _meal_col = st.columns(2)
     with _serv_col:
         servings = st.number_input(
@@ -42,9 +43,8 @@ with st.form("preferences_form"):
             value=current_meals,
             help="Most households do 4-6, leaving room for leftovers or takeout.",
         )
-    if st.form_submit_button("Save", icon=":material/save:"):
-        save_user_settings(conn, servings, meals_per_week)
-        st.toast("Preferences saved.")
+
+prefs_changed = servings != current_servings or meals_per_week != current_meals
 
 # --- Pantry manager ---
 st.divider()
@@ -62,21 +62,23 @@ if items:
         by_cat.setdefault(item["category"].title(), []).append(item)
 
     for category in sorted(by_cat):
-        st.markdown(f"**{category}**")
         cat_items = by_cat[category]
-        for row_start in range(0, len(cat_items), 4):
-            row = cat_items[row_start : row_start + 4]
-            cols = st.columns(4)
-            for col, item in zip(cols, row, strict=False):
-                with col:
-                    if st.button(
-                        f"{item['name']}  \u00d7",
-                        key=f"del_{item['id']}",
-                        use_container_width=True,
-                        type="secondary",
-                    ):
+        item_names = [i["name"] for i in cat_items]
+        # Key includes count so adding/removing items resets selection
+        selected = st.pills(
+            category,
+            options=item_names,
+            default=item_names,
+            selection_mode="multi",
+            key=f"pantry_{category}_{len(cat_items)}",
+        )
+        if selected is not None:
+            removed = set(item_names) - set(selected)
+            if removed:
+                for item in cat_items:
+                    if item["name"] in removed:
                         delete_pantry_item(conn, item["id"])
-                        st.rerun()
+                st.rerun()
 else:
     st.info(
         "Your pantry is empty. Add items you keep on hand — "
@@ -110,13 +112,11 @@ for tab, (section, section_items) in zip(
 
 # Custom item
 with st.form("add_custom_item"):
-    col1, col2 = st.columns([3, 1])
-    custom_name = col1.text_input(
+    custom_name = st.text_input(
         "Add something else",
         placeholder="e.g. Tahini, Gochujang, Miso paste",
     )
-    col2.markdown("<br>", unsafe_allow_html=True)
-    submitted = col2.form_submit_button("Add", use_container_width=True)
+    submitted = st.form_submit_button("Add")
 
 if submitted and custom_name.strip():
     add_pantry_item(
@@ -126,6 +126,33 @@ if submitted and custom_name.strip():
         get_section(custom_name.strip()),
     )
     st.rerun()
+
+# --- Next steps ---
+st.divider()
+
+if prefs_changed:
+    st.caption("You have unsaved preference changes.")
+
+_browse_col, _plan_col = st.columns(2)
+with _browse_col:
+    if st.button(
+        "Browse Recipes",
+        icon=":material/menu_book:",
+        use_container_width=True,
+    ):
+        if prefs_changed:
+            save_user_settings(conn, servings, meals_per_week)
+        st.switch_page("pages/1_recipes.py")
+with _plan_col:
+    if st.button(
+        "Generate Meal Plan",
+        icon=":material/restaurant:",
+        type="primary",
+        use_container_width=True,
+    ):
+        if prefs_changed:
+            save_user_settings(conn, servings, meals_per_week)
+        st.switch_page("pages/2_planner.py")
 
 # --- Reset section ---
 st.divider()
@@ -176,39 +203,3 @@ if st.session_state.get("confirm_clear"):
                 st.switch_page("pages/0_setup.py")
 
     _confirm_clear()
-
-# --- Re-run setup ---
-st.divider()
-if st.button(
-    "Re-run Setup",
-    icon=":material/rocket_launch:",
-    type="tertiary",
-    help="Reset everything and go through the setup page again.",
-):
-    st.session_state.confirm_rerun = True
-
-if st.session_state.get("confirm_rerun"):
-
-    @st.dialog("Re-run setup?")
-    def _confirm_rerun():
-        st.warning(
-            "This clears your settings, pantry items, and meal plans, "
-            "then starts the setup wizard. Your recipe library stays intact."
-        )
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("Cancel", use_container_width=True, key="cancel_rerun"):
-                st.session_state.confirm_rerun = False
-                st.rerun()
-        with col2:
-            if st.button(
-                "Re-run Setup",
-                type="primary",
-                use_container_width=True,
-                key="confirm_rerun_btn",
-            ):
-                clear_user_data(conn)
-                st.session_state.confirm_rerun = False
-                st.switch_page("pages/0_setup.py")
-
-    _confirm_rerun()

@@ -74,18 +74,19 @@ _default_servings = _settings["servings"] if _settings else 4
 
 # --- Inline plan settings ---
 
-_plan_col, _serv_col = st.columns(2)
-with _plan_col:
-    num_days = st.number_input(
-        "Meals to plan", min_value=1, max_value=7, value=_default_days,
-    )
-with _serv_col:
-    _default_servings = st.number_input(
-        "Servings per meal", min_value=1, max_value=20, value=_default_servings,
-    )
+with st.container(border=True):
+    _plan_col, _serv_col = st.columns(2)
+    with _plan_col:
+        num_days = st.number_input(
+            "Meals to plan", min_value=1, max_value=7, value=_default_days,
+        )
+    with _serv_col:
+        _default_servings = st.number_input(
+            "Servings per meal", min_value=1, max_value=20, value=_default_servings,
+        )
 start_day = "Monday"  # kept for internal ordering, not shown to user
 
-with st.expander("Customize", expanded=True):
+with st.expander("Customize"):
     available_tags = [t for t in get_unique_tags(conn) if not t.rstrip("min").isdigit()]
     lifestyle_tags = [
         t for t in available_tags if t in {
@@ -192,7 +193,11 @@ if pinned:
                 "Some may be dropped."
             )
 else:
-    st.caption("No pinned recipes — the planner will pick for you.")
+    st.info(
+        "No pinned recipes yet. "
+        "[Browse the Recipe Library](1_recipes) to pin favorites, "
+        "or let the planner pick for you."
+    )
 
 # --- Generate plan ---
 gen_col, clear_col = st.columns([3, 1])
