@@ -9,6 +9,7 @@ from src.database import (
     create_meal_plan,
     get_connection,
     get_meal_plans,
+    get_recipe_details,
     get_unique_proteins,
     get_unique_tags,
     get_user_settings,
@@ -244,39 +245,40 @@ if "current_plan" in st.session_state:
     st.subheader("Your Meal Plan")
 
     for idx, row in plan_df.iterrows():
+        plan_df.at[idx, "servings"] = _default_servings
         with st.container(border=True):
-            st.markdown(f"**Meal {idx + 1}: {row['title']}**")
-            meta = f"_{row['protein']}_"
-            pantry = row.get("pantry_matches", "")
-            if pantry:
-                meta += f" · {pantry}"
-            tags = row.get("tag_bonuses", "")
-            if tags and tags not in ("pinned", "swapped"):
-                meta += f" · {tags}"
-            elif tags == "pinned":
-                meta += " · pinned"
-            elif tags == "swapped":
-                meta += " · swapped"
-            st.caption(meta)
-
-            serv_col, swap_col = st.columns([3, 1])
-            with serv_col:
-                new_servings = st.number_input(
-                    "Servings",
-                    min_value=1,
-                    max_value=20,
-                    value=int(row["servings"]),
-                    key=f"servings_{idx}",
-                    label_visibility="collapsed",
-                )
-                plan_df.at[idx, "servings"] = new_servings
-            with swap_col:
+            _title_col, _swap_col = st.columns([5, 1])
+            with _title_col:
+                st.markdown(f"**Meal {idx + 1}: {row['title']}**")
+                meta = f"_{row['protein']}_"
+                tags = row.get("tag_bonuses", "")
+                if tags and tags not in ("pinned", "swapped"):
+                    meta += f" · {tags}"
+                elif tags == "pinned":
+                    meta += " · pinned"
+                elif tags == "swapped":
+                    meta += " · swapped"
+                st.caption(meta)
+            with _swap_col:
                 if st.button("Swap", key=f"swap_{idx}", use_container_width=True):
                     replacement = pick_replacement(conn, plan_df, idx)
                     for col in replacement:
                         plan_df.at[idx, col] = replacement[col]
                     st.session_state["current_plan"] = plan_df
                     st.rerun()
+
+            with st.expander("View recipe"):
+                details = get_recipe_details(conn, row["recipe_id"])
+                if details:
+                    if details.get("ingredients"):
+                        st.markdown("**Ingredients**")
+                        for ing in details["ingredients"]:
+                            name = ing["raw_text"] or ing["normalized_name"]
+                            prefix = "- (optional) " if ing["is_optional"] else "- "
+                            st.markdown(f"{prefix}{name}")
+                    if details.get("instructions"):
+                        st.markdown("**Instructions**")
+                        st.markdown(details["instructions"])
 
     # --- Save & continue ---
     st.divider()
