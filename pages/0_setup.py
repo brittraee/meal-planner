@@ -21,19 +21,17 @@ with cols[0]:
     st.markdown("#### Plan Meals")
     st.caption(
         "Generate a balanced week of dinners with protein variety, "
-        "tag priorities, and pinned favorites."
     )
 with cols[1]:
     st.markdown("#### Smart Shopping")
     st.caption(
         "Auto-generated lists grouped by store section. "
-        "Pantry staples are filtered out so you only buy what you need."
+        "Tell us what you already have in your pantry for smarter lists."
     )
 with cols[2]:
     st.markdown("#### Track Your Pantry")
     st.caption(
-        "Mark what you keep on hand. Shopping lists "
-        "adjust automatically — no duplicates."
+        "Mark what you keep on hand."
     )
 
 st.markdown("")
